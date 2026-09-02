@@ -1,0 +1,59 @@
+{
+  "name": "tokio-event-loader",
+  "version": "1.0.0",
+  "description": "Tokio's App Event Loader",
+  "type": "module",
+  "main": "dist/index.umd.js",
+  "module": "dist/index.es.js",
+  "types": "./dist/types/index.d.ts",
+  "private": false,
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.umd.js"
+    }
+  },
+  "unpkg": "dist/index.umd.js",
+  "jsdelivr": "dist/index.umd.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "format": "prettier --write .",
+    "lint": "oxlint --type-aware",
+    "build": "vite build",
+    "prepare": "husky"
+  },
+  "author": "Akuqt",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akuqt/tokio-event-loader.git"
+  },
+  "keywords": [
+    "tiktok",
+    "overlays",
+    "alerts",
+    "tokio"
+  ],
+  "bugs": {
+    "url": "https://github.com/Akuqt/tokio-event-loader/issues"
+  },
+  "homepage": "https://tokio.ialfaro.com",
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
+    "@typescript/typescript6": "^6.0.2",
+    "fallow": "^3.22.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.4.1",
+    "oxlint": "^1.81.0",
+    "oxlint-tsgolint": "^7.0.2001",
+    "prettier": "^3.9.6",
+    "terser": "^5.51.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "vite-plugin-dts": "^5.1.0"
+  }
+}
