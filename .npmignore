@@ -1,0 +1,15 @@
+node_modules/
+src/
+tsconfig.json
+vite.config.ts
+.vscode/
+.fallow/
+.fallowrc.json
+.husky/
+.commitlintrc
+.editorconfig
+.lintstagedrc
+.oxlintrc.json
+.prettierignore
+.prettierrc
+yarn.lock

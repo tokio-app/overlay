@@ -1,0 +1,13 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+*.log*
+*.mp*
+bin
+.fallow/
+obj
+output
+music-out
+installer-out
