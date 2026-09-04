@@ -12,15 +12,11 @@ import {
 export { TOKIO_EVENTS };
 
 export class EventLoader {
-  private _ws: WebSocket | null;
-  private _wsurl?: string;
-  private _subscribers: Subscribers;
+  private _ws: WebSocket | null = null;
+  private _wsurl?: string = undefined;
+  private _subscribers: Subscribers = {};
 
-  constructor() {
-    this._ws = null;
-    this._wsurl = undefined;
-    this._subscribers = {};
-  }
+  private _iframeListener: ((event: MessageEvent) => void) | null = null;
 
   /**
    * Initializes the event loader by connecting to the WebSocket server
@@ -29,6 +25,7 @@ export class EventLoader {
    * @param wsurl - Optional WebSocket server URL. If omitted, it falls back to `Tokio App default`.
    */
   public connect(wsurl?: string): void {
+    this.disconnect();
     this._wsurl = wsurl ?? config.WS_URL;
     this._initWebSocket();
     this._initIframeListener();
@@ -40,7 +37,14 @@ export class EventLoader {
   public disconnect(): void {
     if (this._ws) {
       this._ws.close();
+      this._ws = null;
     }
+
+    if (this._iframeListener) {
+      window.removeEventListener("message", this._iframeListener);
+      this._iframeListener = null;
+    }
+
     this._subscribers = {};
   }
 
@@ -100,7 +104,7 @@ export class EventLoader {
     this._ws = new WebSocket(this._wsurl);
 
     this._ws.onopen = () => {
-      this._publish(TOKIO_EVENTS.OPEN, undefined as any);
+      this._publish(TOKIO_EVENTS.OPEN, undefined as never);
     };
 
     this._ws.onmessage = (event: MessageEvent) => {
@@ -112,16 +116,16 @@ export class EventLoader {
       }
     };
 
-    this._ws.onerror = (error: any) => {
+    this._ws.onerror = (error: Event) => {
       const errorPayload: TokioErrorEvent = {
-        type: error?.type ?? "error",
-        message: error?.message ?? "WebSocket Error",
-        error: error ?? new Error("WebSocket Error"),
+        type: "error",
+        message: "WebSocket Error",
+        error: error instanceof Error ? error : new Error("WebSocket Error"),
       };
       this._publish(TOKIO_EVENTS.ERROR, errorPayload);
     };
 
-    this._ws.onclose = (event: any) => {
+    this._ws.onclose = (event: CloseEvent) => {
       const closePayload: TokioCloseEvent = {
         code: event.code,
         reason: event.reason,
@@ -132,45 +136,21 @@ export class EventLoader {
   }
 
   private _initIframeListener(): void {
-    window.addEventListener("message", (event: MessageEvent) => {
+    this._iframeListener = (event: MessageEvent) => {
       const msg = event.data as TokioPreviewMessage;
-      if (msg && msg.action === "TOKIO_PREVIEW" && msg.payload !== undefined) {
+      if (msg?.action === "TOKIO_PREVIEW" && msg.payload !== undefined) {
         this._handleEvents(msg.payload);
       }
-    });
+    };
+    window.addEventListener("message", this._iframeListener);
   }
 
   private _handleEvents(payload: TokioPayload) {
-    switch (payload.type) {
-      case TOKIO_EVENTS.CHAT:
-        this._publish(TOKIO_EVENTS.CHAT, payload.data);
-        break;
-      case TOKIO_EVENTS.SHARE:
-        this._publish(TOKIO_EVENTS.SHARE, payload.data);
-        break;
-      case TOKIO_EVENTS.FOLLOW:
-        this._publish(TOKIO_EVENTS.FOLLOW, payload.data);
-        break;
-      case TOKIO_EVENTS.GIFT:
-        this._publish(TOKIO_EVENTS.GIFT, payload.data);
-        break;
-      case TOKIO_EVENTS.LIKE:
-        this._publish(TOKIO_EVENTS.LIKE, payload.data);
-        break;
-      case TOKIO_EVENTS.SUPER_FAN:
-        this._publish(TOKIO_EVENTS.SUPER_FAN, payload.data);
-        break;
-      case TOKIO_EVENTS.MEMBER_JOIN:
-        this._publish(TOKIO_EVENTS.MEMBER_JOIN, payload.data);
-        break;
-      case TOKIO_EVENTS.SUPER_FAN_JOIN:
-        this._publish(TOKIO_EVENTS.SUPER_FAN_JOIN, payload.data);
-        break;
-      case TOKIO_EVENTS.ROOM_USER:
-        this._publish(TOKIO_EVENTS.ROOM_USER, payload.data);
-        break;
-      default:
-        console.warn(`Received unknown Tokio event type: ${payload.type}`);
+    const validEvents = Object.values(TOKIO_EVENTS);
+    if (validEvents.includes(payload.type)) {
+      this._publish(payload.type, payload.data);
+    } else {
+      console.warn(`Received unknown Tokio event type: ${payload.type}`);
     }
   }
 }
