@@ -44,8 +44,6 @@ export class EventLoader {
       window.removeEventListener("message", this._iframeListener);
       this._iframeListener = null;
     }
-
-    this._subscribers = {};
   }
 
   /**
