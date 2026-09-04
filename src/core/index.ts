@@ -137,7 +137,14 @@ export class EventLoader {
 
   private _initIframeListener(): void {
     this._iframeListener = (event: MessageEvent) => {
-      const msg = event.data as TokioPreviewMessage;
+      let msg = event.data as TokioPreviewMessage;
+      if (typeof msg === "string") {
+        try {
+          msg = JSON.parse(msg);
+        } catch {
+          return;
+        }
+      }
       if (msg?.action === "TOKIO_PREVIEW" && msg.payload !== undefined) {
         this._handleEvents(msg.payload);
       }
