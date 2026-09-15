@@ -10,10 +10,32 @@ import {
   SuperFanJoinEvent,
 } from "./events";
 
+type CustomGift = {
+  value: number;
+  label: string;
+  img: string;
+  coins: number;
+};
+
+type ConfigValue =
+  | string
+  | number
+  | boolean
+  | string[]
+  | number[]
+  | CustomGift
+  | CustomGift[]
+  | undefined;
+
+type OverlayConfigRedux = {
+  [id: string]: ConfigValue;
+};
+
 export enum TOKIO_EVENTS {
   OPEN = "tokio:open",
   ERROR = "tokio:error",
   CLOSE = "tokio:close",
+  CONFIG = "tokio:config",
   // SAME as TIKTOK_EVENTS
   CHAT = "tiktok:chat",
   SHARE = "tiktok:share",
@@ -32,6 +54,7 @@ export interface EventMap {
   [TOKIO_EVENTS.OPEN]: void;
   [TOKIO_EVENTS.ERROR]: TokioErrorEvent;
   [TOKIO_EVENTS.CLOSE]: TokioCloseEvent;
+  [TOKIO_EVENTS.CONFIG]: OverlayConfigRedux;
   [TOKIO_EVENTS.CHAT]: ChatEvent;
   [TOKIO_EVENTS.SHARE]: ShareEvent;
   [TOKIO_EVENTS.FOLLOW]: FollowEvent;
