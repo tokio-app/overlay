@@ -8,11 +8,12 @@ import {
   TokioPayload,
   TokioPreviewMessage,
 } from "../types";
+import ReconnectingWebSocket from "./websocket";
 
 export { TOKIO_EVENTS };
 
 export class EventLoader {
-  private _ws: WebSocket | null = null;
+  private _ws: ReconnectingWebSocket | null = null;
   private _wsurl?: string = undefined;
   private _subscribers: Subscribers = {};
 
@@ -22,12 +23,15 @@ export class EventLoader {
    * Initializes the event loader by connecting to the WebSocket server
    * and setting up the iframe `postMessage` listener for on App previews.
    *
+   * @param id - Overlay ID assigned by the `Tokio App`.
    * @param wsurl - Optional WebSocket server URL. If omitted, it falls back to `Tokio App default`.
    */
-  public connect(wsurl?: string): void {
+  public connect(id: string, wsurl?: string): void {
     this.disconnect();
     this._wsurl = wsurl ?? config.WS_URL;
-    this._initWebSocket();
+    if (window.name !== `TOKIO_APP-${id}`) {
+      this._initWebSocket(id);
+    }
     this._initIframeListener();
   }
 
@@ -54,8 +58,8 @@ export class EventLoader {
    * @returns A cleanup function that unsubscribes this specific listener when called.
    *
    * @example
-   * const unsubscribe = TokioEventLoader.on(TOKIO_EVENTS.DATA, (data) => {
-   *   console.log('Received payload:', data);
+   * const unsubscribe = tokio.on(TOKIO_EVENTS.CHAT, (data) => {
+   *   console.log('Received CHAT payload:', data);
    * });
    *
    * // Later, to unsubscribe:
@@ -96,16 +100,24 @@ export class EventLoader {
     callbacks.forEach((callback) => callback(payload));
   }
 
-  private _initWebSocket(): void {
-    if (!this._wsurl) return;
+  private _initWebSocket(id: string): void {
+    if (!this._wsurl || !id) return;
 
-    this._ws = new WebSocket(this._wsurl);
+    const _url = `${this._wsurl}?id=${id}`;
+
+    this._ws = new ReconnectingWebSocket(_url, [], {
+      minReconnectionDelay: 2000 + Math.random() * 1000,
+      reconnectionDelayGrowFactor: 1.5,
+      maxReconnectionDelay: 30000,
+      maxRetries: 30,
+      connectionTimeout: 5000,
+    });
 
     this._ws.onopen = () => {
-      this._publish(TOKIO_EVENTS.OPEN, undefined as never);
+      this._publish(TOKIO_EVENTS.OPEN, undefined);
     };
 
-    this._ws.onmessage = (event: MessageEvent) => {
+    this._ws.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data) as TokioPayload;
         this._handleEvents(payload);
@@ -114,16 +126,16 @@ export class EventLoader {
       }
     };
 
-    this._ws.onerror = (error: Event) => {
+    this._ws.onerror = (event) => {
       const errorPayload: TokioErrorEvent = {
         type: "error",
-        message: "WebSocket Error",
-        error: error instanceof Error ? error : new Error("WebSocket Error"),
+        message: event.message || "WebSocket Error",
+        error: event.error || new Error(event.message || "WebSocket Error"),
       };
       this._publish(TOKIO_EVENTS.ERROR, errorPayload);
     };
 
-    this._ws.onclose = (event: CloseEvent) => {
+    this._ws.onclose = (event) => {
       const closePayload: TokioCloseEvent = {
         code: event.code,
         reason: event.reason,
