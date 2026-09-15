@@ -1,3 +1,3 @@
 export default {
-  WS_URL: "ws://localhost:6767",
+  WS_URL: "ws://localhost:37891",
 };
