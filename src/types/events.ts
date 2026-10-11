@@ -63,3 +63,11 @@ export interface LikeEvent {
   likeCount: number;
   totalLikes: number;
 }
+
+export type MusicInfo = {
+  title: string;
+  thumbnail: string;
+  duration: number;
+  playing: boolean;
+  played: boolean;
+};

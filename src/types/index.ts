@@ -4,6 +4,7 @@ import {
   GiftEvent,
   LikeEvent,
   MemberEvent,
+  MusicInfo,
   RoomUserEvent,
   ShareEvent,
   SuperFanEvent,
@@ -37,17 +38,18 @@ export enum TOKIO_EVENTS {
   CLOSE = "tokio:close",
   CONFIG = "tokio:config",
   // SAME as TIKTOK_EVENTS
-  CHAT = "tiktok:chat",
-  SHARE = "tiktok:share",
-  FOLLOW = "tiktok:follow",
-  GIFT = "tiktok:gift",
-  LIKE = "tiktok:like",
-  ENVELOPE = "tiktok:envelope",
-  SUPER_FAN = "tiktok:superfan",
-  SUPER_FAN_BOX = "tiktok:superfanbox",
-  SUPER_FAN_JOIN = "tiktok:superfanjoin",
-  MEMBER_JOIN = "tiktok:memberjoin",
-  ROOM_USER = "tiktok:roomuser",
+  CHAT = "tokio:event:chat",
+  SHARE = "tokio:event:share",
+  FOLLOW = "tokio:event:follow",
+  GIFT = "tokio:event:gift",
+  LIKE = "tokio:event:like",
+  ENVELOPE = "tokio:event:envelope",
+  SUPER_FAN = "tokio:event:superfan",
+  SUPER_FAN_BOX = "tokio:event:superfanbox",
+  SUPER_FAN_JOIN = "tokio:event:superfanjoin",
+  MEMBER_JOIN = "tokio:event:memberjoin",
+  ROOM_USER = "tokio:event:roomuser",
+  MUSIC_CHANGE = "tokio:event:music:change",
 }
 
 export interface EventMap {
@@ -66,6 +68,7 @@ export interface EventMap {
   [TOKIO_EVENTS.MEMBER_JOIN]: MemberEvent;
   [TOKIO_EVENTS.SUPER_FAN_JOIN]: SuperFanJoinEvent;
   [TOKIO_EVENTS.ROOM_USER]: RoomUserEvent;
+  [TOKIO_EVENTS.MUSIC_CHANGE]: MusicInfo[];
 }
 
 export type AppEvents = Exclude<
