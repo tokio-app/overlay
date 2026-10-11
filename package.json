@@ -1,6 +1,6 @@
 {
   "name": "tokio-event-loader",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Tokio's App Event Loader",
   "type": "module",
   "main": "dist/index.umd.js",
