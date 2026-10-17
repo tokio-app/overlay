@@ -25,7 +25,9 @@
   "scripts": {
     "format": "prettier --write .",
     "lint": "oxlint --type-aware",
+    "typecheck": "tsc --noEmit -p .",
     "build": "vite build",
+    "prepublishOnly": "yarn build",
     "prepare": "husky"
   },
   "author": "Akuqt",
