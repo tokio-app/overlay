@@ -1,4 +1,4 @@
-# @tokioapp/overlay
+# Tokio Overlays Handler
 
 Receive TikTok LIVE events from [Tokio](https://tokio.ialfaro.com) in your stream overlays.
 
