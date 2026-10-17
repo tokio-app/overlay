@@ -1,45 +1,67 @@
 import config from "../config";
 import {
+  AppEvents,
   EventMap,
   Subscribers,
   TOKIO_EVENTS,
   TokioCloseEvent,
   TokioErrorEvent,
   TokioPayload,
-  TokioPreviewMessage,
 } from "../types";
 import ReconnectingWebSocket from "./websocket";
 
 export { TOKIO_EVENTS };
 
+// Events sent by the `Tokio App`. OPEN, ERROR and CLOSE come from this library.
+const APP_EVENTS = new Set<string>(
+  Object.values(TOKIO_EVENTS).filter(
+    (event): event is AppEvents =>
+      event !== TOKIO_EVENTS.OPEN &&
+      event !== TOKIO_EVENTS.ERROR &&
+      event !== TOKIO_EVENTS.CLOSE,
+  ),
+);
+
+const isPayload = (payload: unknown): payload is TokioPayload =>
+  typeof payload === "object" &&
+  payload !== null &&
+  "type" in payload &&
+  typeof payload.type === "string" &&
+  APP_EVENTS.has(payload.type);
+
 export class EventLoader {
   private _ws: ReconnectingWebSocket | null = null;
-  private _wsurl?: string = undefined;
   private _subscribers: Subscribers = {};
 
   private _iframeListener: ((event: MessageEvent) => void) | null = null;
 
   /**
-   * Initializes the event loader by connecting to the WebSocket server
-   * and setting up the iframe `postMessage` listener for on App previews.
+   * Initializes the event loader. Inside a `Tokio App` preview it listens for the
+   * events the App posts to the iframe, anywhere else it connects to the WebSocket server.
    *
    * @param id - Overlay ID assigned by the `Tokio App`.
    * @param wsurl - Optional WebSocket server URL. If omitted, it falls back to `Tokio App default`.
    */
   public connect(id: string, wsurl?: string): void {
     this.disconnect();
-    this._wsurl = wsurl ?? config.WS_URL;
-    if (window.name !== `TOKIO_APP-${id}`) {
-      this._initWebSocket(id);
+    if (window.name === `TOKIO_APP-${id}`) {
+      this._initIframeListener();
+    } else {
+      this._initWebSocket(id, wsurl ?? config.WS_URL);
     }
-    this._initIframeListener();
   }
 
   /**
-   * Closes the active WebSocket connection and removes all registered event subscribers.
+   * Closes the active WebSocket connection and stops listening for previews.
+   * Subscribers stay registered, and no CLOSE event is sent for this connection.
    */
   public disconnect(): void {
     if (this._ws) {
+      // Its close event would otherwise reach subscribers after a new `connect`.
+      this._ws.onopen = null;
+      this._ws.onmessage = null;
+      this._ws.onerror = null;
+      this._ws.onclose = null;
       this._ws.close();
       this._ws = null;
     }
@@ -97,19 +119,29 @@ export class EventLoader {
   ): void {
     const callbacks = this._subscribers[event];
     if (!callbacks) return;
-    callbacks.forEach((callback) => callback(payload));
+    callbacks.forEach((callback) => {
+      // A failing subscriber must not keep the others from running.
+      try {
+        callback(payload);
+      } catch (err) {
+        console.error(`Tokio subscriber for ${event} failed:`, err);
+      }
+    });
   }
 
-  private _initWebSocket(id: string): void {
-    if (!this._wsurl || !id) return;
+  private _initWebSocket(id: string, wsurl: string): void {
+    if (!id) {
+      console.warn("Tokio: connect() needs the overlay ID, not connecting.");
+      return;
+    }
 
-    const _url = `${this._wsurl}?id=${id}`;
+    const url = new URL(wsurl);
+    url.searchParams.set("id", id);
 
-    this._ws = new ReconnectingWebSocket(_url, [], {
+    this._ws = new ReconnectingWebSocket(url.toString(), [], {
       minReconnectionDelay: 2000 + Math.random() * 1000,
       reconnectionDelayGrowFactor: 1.5,
       maxReconnectionDelay: 30000,
-      maxRetries: 30,
       connectionTimeout: 5000,
     });
 
@@ -118,12 +150,14 @@ export class EventLoader {
     };
 
     this._ws.onmessage = (event) => {
+      let payload: unknown;
       try {
-        const payload = JSON.parse(event.data) as TokioPayload;
-        this._handleEvents(payload);
+        payload = JSON.parse(event.data);
       } catch (err) {
         console.error("Failed to parse WebSocket message:", err);
+        return;
       }
+      this._handleEvents(payload);
     };
 
     this._ws.onerror = (event) => {
@@ -147,7 +181,9 @@ export class EventLoader {
 
   private _initIframeListener(): void {
     this._iframeListener = (event: MessageEvent) => {
-      let msg = event.data as TokioPreviewMessage;
+      // Previews are posted by the `Tokio App` page that embeds the overlay.
+      if (event.source !== window.parent) return;
+      let msg: unknown = event.data;
       if (typeof msg === "string") {
         try {
           msg = JSON.parse(msg);
@@ -155,19 +191,28 @@ export class EventLoader {
           return;
         }
       }
-      if (msg?.action === "TOKIO_PREVIEW" && msg.payload !== undefined) {
+      if (
+        typeof msg === "object" &&
+        msg !== null &&
+        "action" in msg &&
+        msg.action === "TOKIO_PREVIEW" &&
+        "payload" in msg
+      ) {
         this._handleEvents(msg.payload);
       }
     };
     window.addEventListener("message", this._iframeListener);
   }
 
-  private _handleEvents(payload: TokioPayload) {
-    const validEvents = Object.values(TOKIO_EVENTS);
-    if (validEvents.includes(payload.type)) {
+  private _handleEvents(payload: unknown) {
+    if (isPayload(payload)) {
       this._publish(payload.type, payload.data);
     } else {
-      console.warn(`Received unknown Tokio event type: ${payload.type}`);
+      const type =
+        typeof payload === "object" && payload !== null && "type" in payload
+          ? payload.type
+          : undefined;
+      console.warn(`Received unknown Tokio event type: ${String(type)}`);
     }
   }
 }
