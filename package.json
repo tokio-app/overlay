@@ -1,7 +1,7 @@
 {
-  "name": "tokio-event-loader",
-  "version": "1.0.4",
-  "description": "Tokio's App Event Loader",
+  "name": "@tokioapp/overlay",
+  "version": "1.0.0",
+  "description": "Receive TikTok LIVE events from Tokio in your stream overlays.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.es.js",
@@ -19,6 +19,9 @@
   "files": [
     "dist"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "format": "prettier --write .",
     "lint": "oxlint --type-aware",
@@ -29,7 +32,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Akuqt/tokio-event-loader.git"
+    "url": "git+https://github.com/tokio-app/overlay.git"
   },
   "keywords": [
     "tiktok",
@@ -38,7 +41,7 @@
     "tokio"
   ],
   "bugs": {
-    "url": "https://github.com/Akuqt/tokio-event-loader/issues"
+    "url": "https://github.com/tokio-app/overlay/issues"
   },
   "homepage": "https://tokio.ialfaro.com",
   "devDependencies": {

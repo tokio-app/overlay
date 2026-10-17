@@ -11,7 +11,7 @@ export default defineConfig({
     },
     lib: {
       entry: "src/index.ts",
-      name: "TokioEventLoader",
+      name: "TokioOverlay",
       fileName: (format) =>
         format === "cjs" ? "index.cjs" : `index.${format}.js`,
       formats: ["es", "umd", "cjs"],
