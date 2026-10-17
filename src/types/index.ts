@@ -1,17 +1,17 @@
 import {
-  ChatEvent,
-  FollowEvent,
-  GiftEvent,
-  LikeEvent,
-  MemberEvent,
-  MusicInfo,
-  RoomUserEvent,
-  ShareEvent,
-  SuperFanEvent,
-  SuperFanJoinEvent,
+  ChatData,
+  FollowData,
+  GiftData,
+  LikeData,
+  MemberJoinData,
+  MusicChangeData,
+  RoomUserData,
+  ShareData,
+  SuperFanData,
+  SuperFanJoinData,
 } from "./events";
 
-type CustomGift = {
+export type CustomGift = {
   value: number;
   label: string;
   img: string;
@@ -28,7 +28,7 @@ type ConfigValue =
   | CustomGift[]
   | undefined;
 
-type OverlayConfigRedux = {
+export type ConfigData = {
   [id: string]: ConfigValue;
 };
 
@@ -54,21 +54,21 @@ export enum TOKIO_EVENTS {
 
 export interface EventMap {
   [TOKIO_EVENTS.OPEN]: void;
-  [TOKIO_EVENTS.ERROR]: TokioErrorEvent;
-  [TOKIO_EVENTS.CLOSE]: TokioCloseEvent;
-  [TOKIO_EVENTS.CONFIG]: OverlayConfigRedux;
-  [TOKIO_EVENTS.CHAT]: ChatEvent;
-  [TOKIO_EVENTS.SHARE]: ShareEvent;
-  [TOKIO_EVENTS.FOLLOW]: FollowEvent;
-  [TOKIO_EVENTS.GIFT]: GiftEvent;
-  [TOKIO_EVENTS.LIKE]: LikeEvent;
+  [TOKIO_EVENTS.ERROR]: ErrorData;
+  [TOKIO_EVENTS.CLOSE]: CloseData;
+  [TOKIO_EVENTS.CONFIG]: ConfigData;
+  [TOKIO_EVENTS.CHAT]: ChatData;
+  [TOKIO_EVENTS.SHARE]: ShareData;
+  [TOKIO_EVENTS.FOLLOW]: FollowData;
+  [TOKIO_EVENTS.GIFT]: GiftData;
+  [TOKIO_EVENTS.LIKE]: LikeData;
   [TOKIO_EVENTS.ENVELOPE]: void;
   [TOKIO_EVENTS.SUPER_FAN_BOX]: void;
-  [TOKIO_EVENTS.SUPER_FAN]: SuperFanEvent;
-  [TOKIO_EVENTS.MEMBER_JOIN]: MemberEvent;
-  [TOKIO_EVENTS.SUPER_FAN_JOIN]: SuperFanJoinEvent;
-  [TOKIO_EVENTS.ROOM_USER]: RoomUserEvent;
-  [TOKIO_EVENTS.MUSIC_CHANGE]: MusicInfo[];
+  [TOKIO_EVENTS.SUPER_FAN]: SuperFanData;
+  [TOKIO_EVENTS.MEMBER_JOIN]: MemberJoinData;
+  [TOKIO_EVENTS.SUPER_FAN_JOIN]: SuperFanJoinData;
+  [TOKIO_EVENTS.ROOM_USER]: RoomUserData;
+  [TOKIO_EVENTS.MUSIC_CHANGE]: MusicChangeData;
 }
 
 export type AppEvents = Exclude<
@@ -88,13 +88,13 @@ export interface TokioPreviewMessage {
   payload: TokioPayload;
 }
 
-export interface TokioErrorEvent {
+export interface ErrorData {
   message?: string;
   type: string;
   error?: Error;
 }
 
-export interface TokioCloseEvent {
+export interface CloseData {
   code: number;
   reason: string;
   wasClean: boolean;

@@ -4,8 +4,8 @@ import {
   EventMap,
   Subscribers,
   TOKIO_EVENTS,
-  TokioCloseEvent,
-  TokioErrorEvent,
+  CloseData,
+  ErrorData,
   TokioPayload,
 } from "../types";
 import ReconnectingWebSocket from "./websocket";
@@ -161,7 +161,7 @@ export class EventLoader {
     };
 
     this._ws.onerror = (event) => {
-      const errorPayload: TokioErrorEvent = {
+      const errorPayload: ErrorData = {
         type: "error",
         message: event.message || "WebSocket Error",
         error: event.error || new Error(event.message || "WebSocket Error"),
@@ -170,7 +170,7 @@ export class EventLoader {
     };
 
     this._ws.onclose = (event) => {
-      const closePayload: TokioCloseEvent = {
+      const closePayload: CloseData = {
         code: event.code,
         reason: event.reason,
         wasClean: event.wasClean,

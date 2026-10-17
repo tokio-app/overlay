@@ -1,4 +1,4 @@
-interface UserData {
+export interface UserData {
   username: string;
   handle: string;
   profilePictures: string[];
@@ -8,7 +8,7 @@ interface UserData {
   fanLevel?: number;
 }
 
-export interface ChatEvent {
+export interface ChatData {
   user: UserData;
   comment: {
     content: string;
@@ -17,7 +17,7 @@ export interface ChatEvent {
   };
 }
 
-export type RoomUserEvent = {
+export type RoomUserData = {
   ranks: (UserData & { score: number; position: number })[];
   views: number;
   viewers: number;
@@ -29,24 +29,24 @@ export interface Emotes {
   images: string[];
 }
 
-export interface ShareEvent {
+export interface ShareData {
   shareCount: number;
   user: UserData;
 }
 
-interface SingleUserEvent {
+interface SingleUserData {
   user: UserData;
 }
 
-export type FollowEvent = SingleUserEvent;
+export type FollowData = SingleUserData;
 
-export type SuperFanEvent = SingleUserEvent;
+export type SuperFanData = SingleUserData;
 
-export type MemberEvent = SingleUserEvent;
+export type MemberJoinData = SingleUserData;
 
-export type SuperFanJoinEvent = SingleUserEvent;
+export type SuperFanJoinData = SingleUserData;
 
-export interface GiftEvent {
+export interface GiftData {
   user: UserData;
   gift: {
     id: string;
@@ -58,7 +58,7 @@ export interface GiftEvent {
   };
 }
 
-export interface LikeEvent {
+export interface LikeData {
   user: UserData;
   likeCount: number;
   totalLikes: number;
@@ -70,3 +70,6 @@ export type MusicInfo = {
   playing: boolean;
   played: boolean;
 };
+
+// The whole music request queue.
+export type MusicChangeData = MusicInfo[];
