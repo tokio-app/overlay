@@ -12,8 +12,9 @@ export default defineConfig({
     lib: {
       entry: "src/index.ts",
       name: "TokioEventLoader",
-      fileName: (format) => `index.${format}.js`,
-      formats: ["es", "umd"],
+      fileName: (format) =>
+        format === "cjs" ? "index.cjs" : `index.${format}.js`,
+      formats: ["es", "umd", "cjs"],
     },
     rollupOptions: {
       external: [],

@@ -3,7 +3,7 @@
   "version": "1.0.4",
   "description": "Tokio's App Event Loader",
   "type": "module",
-  "main": "dist/index.umd.js",
+  "main": "dist/index.cjs",
   "module": "dist/index.es.js",
   "types": "./dist/types/index.d.ts",
   "private": false,
@@ -11,7 +11,7 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/index.es.js",
-      "require": "./dist/index.umd.js"
+      "require": "./dist/index.cjs"
     }
   },
   "unpkg": "dist/index.umd.js",
