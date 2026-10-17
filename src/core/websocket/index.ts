@@ -342,7 +342,8 @@ export default class ReconnectingWebSocket {
     this._handleError(new Events.ErrorEvent(new Error("timeout"), this));
   }
 
-  private _disconnect(code = 1000, reason?: string): void {
+  // A failed connection reports 1006 (abnormal closure), which `close` can't send.
+  private _disconnect(code = 1000, reason?: string, wasClean = true): void {
     this._clearTimeouts();
     if (!this._ws) {
       return;
@@ -350,7 +351,9 @@ export default class ReconnectingWebSocket {
     this._removeListeners();
     try {
       this._ws.close(code, reason);
-      this._handleClose(new Events.CloseEvent(code, reason, this));
+      this._handleClose(
+        new Events.CloseEvent(wasClean ? code : 1006, reason, this, wasClean),
+      );
     } catch {
       // ignore
     }
@@ -428,6 +431,7 @@ export default class ReconnectingWebSocket {
     this._disconnect(
       undefined,
       errorMessage === "timeout" ? "timeout" : undefined,
+      false,
     );
 
     const customEvent =

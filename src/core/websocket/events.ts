@@ -26,12 +26,13 @@ export class ErrorEvent extends Event {
 export class CloseEvent extends Event {
   public code: number;
   public reason: string;
-  public wasClean = true;
+  public wasClean: boolean;
 
-  constructor(code = 1000, reason = "", target: unknown) {
+  constructor(code = 1000, reason = "", target: unknown, wasClean = true) {
     super("close", target);
     this.code = code;
     this.reason = reason;
+    this.wasClean = wasClean;
   }
 }
 
