@@ -67,7 +67,6 @@ export interface LikeEvent {
 export type MusicInfo = {
   title: string;
   thumbnail: string;
-  duration: number;
   playing: boolean;
   played: boolean;
 };
