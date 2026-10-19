@@ -173,22 +173,22 @@ Use the `TOKIO_EVENTS` constants. Messages with an unknown event are logged and 
 
 Each event's data has a type named after it:
 
-| Event                               | Type               | Data                                                                    |
-| ----------------------------------- | ------------------ | ----------------------------------------------------------------------- |
-| `CHAT`                              | `ChatData`         | `{ user, comment: { content, emotes, lang } }`                          |
-| `FOLLOW`                            | `FollowData`       | `{ user }`                                                              |
-| `SHARE`                             | `ShareData`        | `{ user, shareCount }`                                                  |
-| `LIKE`                              | `LikeData`         | `{ user, likeCount, totalLikes }`                                       |
-| `GIFT`                              | `GiftData`         | `{ user, gift: { id, name, coins, type, comboCount, repeatEnd } }`      |
-| `SUPER_FAN`                         | `SuperFanData`     | `{ user }`                                                              |
-| `SUPER_FAN_JOIN`                    | `SuperFanJoinData` | `{ user }`                                                              |
-| `MEMBER_JOIN`                       | `MemberJoinData`   | `{ user }`                                                              |
-| `ROOM_USER`                         | `RoomUserData`     | `{ views, viewers, ranks: (UserData & { score, position })[] }`         |
-| `MUSIC_CHANGE`                      | `MusicChangeData`  | The whole queue, `MusicInfo[]`: `{ title, thumbnail, playing, played }` |
-| `CLOSE`                             | `CloseData`        | `{ code, reason, wasClean }`                                            |
-| `ERROR`                             | `ErrorData`        | `{ type: "error", message, error }`                                     |
-| `CONFIG`                            | `ConfigData`       | The settings, the same object as `window.__OVERLAY_CONFIG__`            |
-| `ENVELOPE`, `SUPER_FAN_BOX`, `OPEN` |                    | none                                                                    |
+| Event                               | Type               | Data                                                                      |
+| ----------------------------------- | ------------------ | ------------------------------------------------------------------------- |
+| `CHAT`                              | `ChatData`         | `{ user, comment: { content, emotes, lang } }`                            |
+| `FOLLOW`                            | `FollowData`       | `{ user }`                                                                |
+| `SHARE`                             | `ShareData`        | `{ user, shareCount }`                                                    |
+| `LIKE`                              | `LikeData`         | `{ user, likeCount, totalLikes }`                                         |
+| `GIFT`                              | `GiftData`         | `{ user, gift: { id, name, coins, type, comboCount, repeatEnd, image } }` |
+| `SUPER_FAN`                         | `SuperFanData`     | `{ user }`                                                                |
+| `SUPER_FAN_JOIN`                    | `SuperFanJoinData` | `{ user }`                                                                |
+| `MEMBER_JOIN`                       | `MemberJoinData`   | `{ user }`                                                                |
+| `ROOM_USER`                         | `RoomUserData`     | `{ views, viewers, ranks: (UserData & { score, position })[] }`           |
+| `MUSIC_CHANGE`                      | `MusicChangeData`  | The whole queue, `MusicInfo[]`: `{ title, thumbnail, playing, played }`   |
+| `CLOSE`                             | `CloseData`        | `{ code, reason, wasClean }`                                              |
+| `ERROR`                             | `ErrorData`        | `{ type: "error", message, error }`                                       |
+| `CONFIG`                            | `ConfigData`       | The settings, the same object as `window.__OVERLAY_CONFIG__`              |
+| `ENVELOPE`, `SUPER_FAN_BOX`, `OPEN` |                    | none                                                                      |
 
 `user` is the viewer who triggered the event:
 
@@ -204,7 +204,7 @@ interface UserData {
 }
 ```
 
-Each chat emote is `{ emoteID, index, images }`. A gift setting in `ConfigData` is a `CustomGift`: `{ value, label, img, coins }`.
+Each chat emote is `{ emoteID, index, images }`. A gift's `image` is the URL of its picture. A gift setting in `ConfigData` is a `CustomGift`: `{ value, label, img, coins }`.
 
 A gift streak sends several `GIFT` events with a growing `comboCount`. The last one has `repeatEnd: true`; react to that one for a single reaction per combo.
 
