@@ -108,7 +108,7 @@ Before you import the overlay, its ID is still empty. To test it:
 1. In Tokio, turn on **Settings → Overlay Server**.
 2. Create an ID under **Tools → Test Overlays**.
 3. Connect with it, for example `tokio.connect("<test ID>")`, and open the overlay in your browser.
-4. Click **Test**. Tokio sends your overlay a sample of every LIVE event.
+4. Click **Test**. Tokio sends your overlay every LIVE event, carrying on from your last test: the same viewers come back, likes and coins add up, and a gift streak grows over a few clicks before it ends.
 
 Switch back to `window.__OVERLAY_ID__` before you import it.
 
