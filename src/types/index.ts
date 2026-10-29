@@ -18,7 +18,7 @@ export type CustomGift = {
   coins: number;
 };
 
-type ConfigValue =
+type FieldValue =
   | string
   | number
   | boolean
@@ -27,6 +27,9 @@ type ConfigValue =
   | CustomGift
   | CustomGift[]
   | undefined;
+
+// A table setting is a list of rows, each cell keyed by its column's id
+type ConfigValue = FieldValue | { [id: string]: FieldValue }[];
 
 export type ConfigData = {
   [id: string]: ConfigValue;
