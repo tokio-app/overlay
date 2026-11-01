@@ -108,7 +108,7 @@ Before you import the overlay, its ID is still empty. To test it:
 1. In Tokio, turn on **Settings → Overlay Server**.
 2. Create an ID under **Tools → Test Overlays**.
 3. Connect with it, for example `tokio.connect("<test ID>")`, and open the overlay in your browser.
-4. Click **Test**. Tokio sends your overlay every LIVE event, carrying on from your last test: the same viewers come back, likes and coins add up, and a gift streak grows over a few clicks before it ends.
+4. Click **Test**. Tokio sends your overlay every LIVE event and a sample of the fans and top gifters. The events carry on from your last test: the same viewers come back, likes and coins add up, and a gift streak grows over a few clicks before it ends.
 
 Switch back to `window.__OVERLAY_ID__` before you import it.
 
@@ -162,13 +162,14 @@ Use the `TOKIO_EVENTS` constants. Messages with an unknown event are logged and 
 
 ### Library events
 
-| Constant | Event name     | Sent when                                                                                 |
-| -------- | -------------- | ----------------------------------------------------------------------------------------- |
-| `OPEN`   | `tokio:open`   | The connection to Tokio opens, also after each reconnect                                  |
-| `CLOSE`  | `tokio:close`  | The connection closes or an attempt fails. A failed one has code 1006, not `wasClean`     |
-| `ERROR`  | `tokio:error`  | The connection fails or times out                                                         |
-| `CONFIG` | `tokio:config` | The streamer saves the overlay's settings                                                 |
-| `FANS`   | `tokio:fans`   | The overlay connects, and again when the fans Tokio keeps change, at most every 5 seconds |
+| Constant  | Event name      | Sent when                                                                                 |
+| --------- | --------------- | ----------------------------------------------------------------------------------------- |
+| `OPEN`    | `tokio:open`    | The connection to Tokio opens, also after each reconnect                                  |
+| `CLOSE`   | `tokio:close`   | The connection closes or an attempt fails. A failed one has code 1006, not `wasClean`     |
+| `ERROR`   | `tokio:error`   | The connection fails or times out                                                         |
+| `CONFIG`  | `tokio:config`  | The streamer saves the overlay's settings                                                 |
+| `FANS`    | `tokio:fans`    | The overlay connects, and again when the fans Tokio keeps change, at most every 5 seconds |
+| `GIFTERS` | `tokio:gifters` | The overlay connects, and again when the top gifters change, at most once a second        |
 
 ### Data
 
@@ -190,6 +191,7 @@ Each event's data has a type named after it:
 | `ERROR`                             | `ErrorData`        | `{ type: "error", message, error }`                                       |
 | `CONFIG`                            | `ConfigData`       | The settings, the same object as `window.__OVERLAY_CONFIG__`              |
 | `FANS`                              | `FansData`         | `{ fans: Fan[] }`, see below                                              |
+| `GIFTERS`                           | `GiftersData`      | `{ live: TopGifter[], allTime: TopGifter[] }`, see below                  |
 | `ENVELOPE`, `SUPER_FAN_BOX`, `OPEN` |                    | none                                                                      |
 
 `user` is the viewer who triggered the event:
@@ -210,7 +212,9 @@ interface UserData {
 
 `fanBadge` is the picture TikTok shows for the fan level: a heart that changes every 10 levels, without the number, so draw `fanLevel` next to it. It's `""` for a viewer who isn't a fan.
 
-`FANS` lists the fans the streamer's profile has seen in its LIVEs. TikTok only sends a viewer's fan level when they do something, so this is how an overlay shows fans it hasn't seen since it loaded. It has up to 100, the highest `fanLevel` first, then the most recently seen. Each `Fan` is `{ userId, username, handle, fanLevel, fanBadge, seenAt }`, with `seenAt` in milliseconds since the epoch. Fans have no profile picture, since TikTok's links to them expire within a couple of days; for a fan in the LIVE, take it from the `user` of their events. The badge's links don't expire. Tokio's previews don't send `FANS`.
+`FANS` lists the fans the streamer's profile has seen in its LIVEs. TikTok only sends a viewer's fan level when they do something, so this is how an overlay shows fans it hasn't seen since it loaded. It has up to 100, the highest `fanLevel` first, then the most recently seen. Each `Fan` is `{ userId, username, handle, fanLevel, fanBadge, superfan, seenAt }`, with `seenAt` in milliseconds since the epoch. `superfan` says whether they're a Super Fan, as their last chat, gift or Super Fan event said. Fans have no profile picture, since TikTok's links to them expire within a couple of days; for a fan in the LIVE, take it from the `user` of their events. The badge's links don't expire. In Tokio's previews, `FANS` comes as a sample when you click **Test**.
+
+`GIFTERS` brings the top gifters. `live` is this LIVE's top 10 by `live.coins`, and `[]` while Tokio isn't connected. `allTime` is the top 10 by `allTime.coins` across every LIVE the streamer's profile kept, this one included. Ties go to whoever got there first. Tokio sends it as the overlay connects, after a profile loads, when a LIVE starts or ends, when a LIVE is deleted or the history cleared, and on gifts, at most once a second. Each `TopGifter` is `{ userId, username, handle, picture, live, allTime, giftedAt }`, with `live` and `allTime` as `{ coins, gifts }`. `live` is 0 coins and 0 gifts for someone who hasn't sent gifts in this LIVE. Only gifts count as coins: treasure chests and Super Fan subscriptions don't. `giftedAt` is when their last gift came, in milliseconds since the epoch. `picture` is TikTok's link from the viewer's latest gift, or `""` when TikTok sent none. TikTok's links expire about 2 days after it sends them, so fall back to something, such as their initial, when one fails to load. In Tokio's previews, `GIFTERS` comes as a sample when you click **Test**.
 
 Each chat emote is `{ emoteID, index, images }`. A gift's `image` is the URL of its picture. A gift setting in `ConfigData` is a `CustomGift`: `{ value, label, img, coins }`. A table setting is a list of rows, each an object of its cells keyed by column id, every cell read like a setting of its type. A font setting is a font's name, or `""` for your overlay's own font.
 
@@ -230,7 +234,7 @@ const onGift = (data: GiftData) => {
 tokio.on(TOKIO_EVENTS.GIFT, onGift);
 ```
 
-Besides the data types above, the package exports `UserData`, `Fan`, `Emotes`, `MusicInfo`, `CustomGift`, `EventMap` (each event's data) and `TokioPayload` (a message from Tokio).
+Besides the data types above, the package exports `UserData`, `Fan`, `TopGifter`, `Emotes`, `MusicInfo`, `CustomGift`, `EventMap` (each event's data) and `TokioPayload` (a message from Tokio).
 
 To type the setup block's values:
 

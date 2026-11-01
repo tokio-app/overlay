@@ -3,6 +3,7 @@ import {
   FansData,
   FollowData,
   GiftData,
+  GiftersData,
   LikeData,
   MemberJoinData,
   MusicChangeData,
@@ -43,6 +44,8 @@ export enum TOKIO_EVENTS {
   CONFIG = "tokio:config",
   // The fans the streamer's profile keeps, from Tokio
   FANS = "tokio:fans",
+  // The top gifters of this LIVE and of all the profile's LIVEs, from Tokio
+  GIFTERS = "tokio:gifters",
   // SAME as TIKTOK_EVENTS
   CHAT = "tokio:event:chat",
   SHARE = "tokio:event:share",
@@ -64,6 +67,7 @@ export interface EventMap {
   [TOKIO_EVENTS.CLOSE]: CloseData;
   [TOKIO_EVENTS.CONFIG]: ConfigData;
   [TOKIO_EVENTS.FANS]: FansData;
+  [TOKIO_EVENTS.GIFTERS]: GiftersData;
   [TOKIO_EVENTS.CHAT]: ChatData;
   [TOKIO_EVENTS.SHARE]: ShareData;
   [TOKIO_EVENTS.FOLLOW]: FollowData;

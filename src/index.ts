@@ -19,6 +19,7 @@ export type {
   FansData,
   FollowData,
   GiftData,
+  GiftersData,
   LikeData,
   MemberJoinData,
   MusicChangeData,
@@ -27,5 +28,6 @@ export type {
   ShareData,
   SuperFanData,
   SuperFanJoinData,
+  TopGifter,
   UserData,
 } from "./types/events";
