@@ -162,12 +162,13 @@ Use the `TOKIO_EVENTS` constants. Messages with an unknown event are logged and 
 
 ### Library events
 
-| Constant | Event name     | Sent when                                                                             |
-| -------- | -------------- | ------------------------------------------------------------------------------------- |
-| `OPEN`   | `tokio:open`   | The connection to Tokio opens, also after each reconnect                              |
-| `CLOSE`  | `tokio:close`  | The connection closes or an attempt fails. A failed one has code 1006, not `wasClean` |
-| `ERROR`  | `tokio:error`  | The connection fails or times out                                                     |
-| `CONFIG` | `tokio:config` | The streamer saves the overlay's settings                                             |
+| Constant | Event name     | Sent when                                                                                 |
+| -------- | -------------- | ----------------------------------------------------------------------------------------- |
+| `OPEN`   | `tokio:open`   | The connection to Tokio opens, also after each reconnect                                  |
+| `CLOSE`  | `tokio:close`  | The connection closes or an attempt fails. A failed one has code 1006, not `wasClean`     |
+| `ERROR`  | `tokio:error`  | The connection fails or times out                                                         |
+| `CONFIG` | `tokio:config` | The streamer saves the overlay's settings                                                 |
+| `FANS`   | `tokio:fans`   | The overlay connects, and again when the fans Tokio keeps change, at most every 5 seconds |
 
 ### Data
 
@@ -188,6 +189,7 @@ Each event's data has a type named after it:
 | `CLOSE`                             | `CloseData`        | `{ code, reason, wasClean }`                                              |
 | `ERROR`                             | `ErrorData`        | `{ type: "error", message, error }`                                       |
 | `CONFIG`                            | `ConfigData`       | The settings, the same object as `window.__OVERLAY_CONFIG__`              |
+| `FANS`                              | `FansData`         | `{ fans: Fan[] }`, see below                                              |
 | `ENVELOPE`, `SUPER_FAN_BOX`, `OPEN` |                    | none                                                                      |
 
 `user` is the viewer who triggered the event:
@@ -201,8 +203,14 @@ interface UserData {
   follower?: boolean;
   moderator?: boolean;
   fanLevel?: number;
+  fanBadge?: string; // the picture of the fan level's badge
+  userId?: string; // TikTok's id, which stays when the handle changes
 }
 ```
+
+`fanBadge` is the picture TikTok shows for the fan level: a heart that changes every 10 levels, without the number, so draw `fanLevel` next to it. It's `""` for a viewer who isn't a fan.
+
+`FANS` lists the fans the streamer's profile has seen in its LIVEs. TikTok only sends a viewer's fan level when they do something, so this is how an overlay shows fans it hasn't seen since it loaded. It has up to 100, the highest `fanLevel` first, then the most recently seen. Each `Fan` is `{ userId, username, handle, fanLevel, fanBadge, seenAt }`, with `seenAt` in milliseconds since the epoch. Fans have no profile picture, since TikTok's links to them expire within a couple of days; for a fan in the LIVE, take it from the `user` of their events. The badge's links don't expire. Tokio's previews don't send `FANS`.
 
 Each chat emote is `{ emoteID, index, images }`. A gift's `image` is the URL of its picture. A gift setting in `ConfigData` is a `CustomGift`: `{ value, label, img, coins }`. A table setting is a list of rows, each an object of its cells keyed by column id, every cell read like a setting of its type. A font setting is a font's name, or `""` for your overlay's own font.
 
@@ -222,7 +230,7 @@ const onGift = (data: GiftData) => {
 tokio.on(TOKIO_EVENTS.GIFT, onGift);
 ```
 
-Besides the data types above, the package exports `UserData`, `Emotes`, `MusicInfo`, `CustomGift`, `EventMap` (each event's data) and `TokioPayload` (a message from Tokio).
+Besides the data types above, the package exports `UserData`, `Fan`, `Emotes`, `MusicInfo`, `CustomGift`, `EventMap` (each event's data) and `TokioPayload` (a message from Tokio).
 
 To type the setup block's values:
 

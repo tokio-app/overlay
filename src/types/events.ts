@@ -6,6 +6,11 @@ export interface UserData {
   follower?: boolean;
   moderator?: boolean;
   fanLevel?: number;
+  // The picture of the fan level's badge: a heart that changes every 10
+  // levels, without the number. Draw fanLevel next to it.
+  fanBadge?: string;
+  // TikTok's id for the account, which stays when the handle changes.
+  userId?: string;
 }
 
 export interface ChatData {
@@ -74,3 +79,20 @@ export type MusicInfo = {
 
 // The whole music request queue.
 export type MusicChangeData = MusicInfo[];
+
+// A fan the streamer's profile keeps, as Tokio last saw them in a LIVE. No
+// profile picture: TikTok's links expire within days. The badge's don't.
+export interface Fan {
+  userId: string;
+  username: string;
+  handle: string;
+  fanLevel: number;
+  fanBadge: string;
+  // When Tokio last saw them, in ms since the epoch.
+  seenAt: number;
+}
+
+// Up to 100 fans, the highest fan level first, then the most recently seen.
+export interface FansData {
+  fans: Fan[];
+}

@@ -15,6 +15,8 @@ export type {
 export type {
   ChatData,
   Emotes,
+  Fan,
+  FansData,
   FollowData,
   GiftData,
   LikeData,

@@ -1,5 +1,6 @@
 import {
   ChatData,
+  FansData,
   FollowData,
   GiftData,
   LikeData,
@@ -40,6 +41,8 @@ export enum TOKIO_EVENTS {
   ERROR = "tokio:error",
   CLOSE = "tokio:close",
   CONFIG = "tokio:config",
+  // The fans the streamer's profile keeps, from Tokio
+  FANS = "tokio:fans",
   // SAME as TIKTOK_EVENTS
   CHAT = "tokio:event:chat",
   SHARE = "tokio:event:share",
@@ -60,6 +63,7 @@ export interface EventMap {
   [TOKIO_EVENTS.ERROR]: ErrorData;
   [TOKIO_EVENTS.CLOSE]: CloseData;
   [TOKIO_EVENTS.CONFIG]: ConfigData;
+  [TOKIO_EVENTS.FANS]: FansData;
   [TOKIO_EVENTS.CHAT]: ChatData;
   [TOKIO_EVENTS.SHARE]: ShareData;
   [TOKIO_EVENTS.FOLLOW]: FollowData;
