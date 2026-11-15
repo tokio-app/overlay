@@ -177,7 +177,7 @@ Each event's data has a type named after it:
 
 | Event                               | Type               | Data                                                                      |
 | ----------------------------------- | ------------------ | ------------------------------------------------------------------------- |
-| `CHAT`                              | `ChatData`         | `{ user, comment: { content, emotes, lang } }`                            |
+| `CHAT`                              | `ChatData`         | `{ user, comment: { content, emotes, lang, translation? } }`              |
 | `FOLLOW`                            | `FollowData`       | `{ user }`                                                                |
 | `SHARE`                             | `ShareData`        | `{ user, shareCount }`                                                    |
 | `LIKE`                              | `LikeData`         | `{ user, likeCount, totalLikes }`                                         |
@@ -218,7 +218,9 @@ interface UserData {
 
 `MUSIC_CHANGE` brings the whole song request queue, in order: the songs already played, the one playing (`playing: true`), then the ones waiting. Tokio sends it each time the queue changes, when its last song ends, and as the overlay connects while the queue has songs. When no song is playing, the queue is empty or its last song ended. `title` is the song and its artists, as `Song - Artist`. Tokio can't tell when a song is paused, so `playing` only marks where the queue is. In Tokio's previews, `MUSIC_CHANGE` comes as a sample when you click **Test**.
 
-Each chat emote is `{ emoteID, index, images }`. A gift's `image` is the URL of its picture. A gift setting in `ConfigData` is a `CustomGift`: `{ value, label, img, coins }`. A table setting is a list of rows, each an object of its cells keyed by column id, every cell read like a setting of its type. A font setting is a font's name, or `""` for your overlay's own font.
+A chat's `content` is what the viewer typed, and `lang` is the language TikTok tagged it with, `""` when it didn't. When the streamer turns on **Chat translation** in Tokio's Settings, a message TikTok tagged with another language comes with `translation`: `{ text, from, to }`, the translated text and the two languages as lowercase codes, like `en` and `es`. It's left out for messages already in the streamer's language, chat commands, and messages Tokio couldn't translate, so fall back to `content`. In Tokio's previews, some sample chats carry one when you click **Test**.
+
+Each chat emote is `{ emoteID, index, images }`. An emote's `index` points into `content`, not the translation. A gift's `image` is the URL of its picture. A gift setting in `ConfigData` is a `CustomGift`: `{ value, label, img, coins }`. A table setting is a list of rows, each an object of its cells keyed by column id, every cell read like a setting of its type. A font setting is a font's name, or `""` for your overlay's own font.
 
 A gift streak sends several `GIFT` events with a growing `comboCount`. The last one has `repeatEnd: true`; react to that one for a single reaction per combo.
 

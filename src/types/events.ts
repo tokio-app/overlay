@@ -13,12 +13,26 @@ export interface UserData {
   userId?: string;
 }
 
+// A chat message translated by Tokio's Chat translation. Codes are lowercase
+// BCP 47 tags, like "en" and "zh-hans".
+export interface ChatTranslation {
+  text: string;
+  // The language the message was in
+  from: string;
+  // The language the streamer picked
+  to: string;
+}
+
 export interface ChatData {
   user: UserData;
   comment: {
+    // As the viewer typed it. Emotes' indexes point into it.
     content: string;
     emotes: Emotes[];
     lang: string;
+    // Only when Chat translation is on and the message was in another
+    // language
+    translation?: ChatTranslation;
   };
 }
 

@@ -14,6 +14,7 @@ export type {
 } from "./types";
 export type {
   ChatData,
+  ChatTranslation,
   Emotes,
   Fan,
   FansData,
