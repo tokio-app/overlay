@@ -10,11 +10,12 @@ export interface UserData {
   // levels, without the number. Draw fanLevel next to it.
   fanBadge?: string;
   // The platform's id for the account, which stays when the handle changes.
-  // Other platforms' start with their name ("twitch:1234"), so they never
-  // match TikTok's, which are saved bare.
+  // Other platforms' start with their name ("twitch:1234", "youtube:UC…"),
+  // so they never match TikTok's, which are saved bare. A YouTube Gift's
+  // sender has no channel id in its chat, so theirs is "youtube:@handle".
   userId?: string;
   // Where the viewer is. Missing means TikTok.
-  platform?: "tiktok" | "twitch";
+  platform?: "tiktok" | "twitch" | "youtube";
 }
 
 // A chat message translated by Tokio's Chat translation. Codes are lowercase
@@ -88,11 +89,11 @@ export interface LikeData {
   totalLikes: number;
 }
 
-// A paid subscription, new or renewed, on Twitch
+// A paid subscription, new or renewed: Twitch's, or a YouTube membership
 export interface SubscribeData {
   user: UserData;
-  // The platform's own tier: "1000", "2000", "3000" or "prime"; "" when it
-  // has none
+  // The platform's own tier: "1000", "2000", "3000" or "prime" on Twitch;
+  // "" on YouTube, whose channels name their own levels
   tier: string;
   // Months subscribed so far, 1 for a new one
   months: number;
@@ -127,6 +128,17 @@ export interface RedeemData {
   reward: { id: string; title: string; cost: number };
   // What the reward asked the viewer to type, "" for none
   input: string;
+}
+
+// A Super Chat or Super Sticker a viewer bought on YouTube
+export interface SuperChatData {
+  user: UserData;
+  // As YouTube shows it, in the viewer's currency: "$4.99", "MX$100.00"
+  amount: string;
+  // What the viewer wrote, "" for none or a sticker
+  message: string;
+  // A Super Sticker's picture, "" for a Super Chat
+  sticker: string;
 }
 
 export type MusicInfo = {

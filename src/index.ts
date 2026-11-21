@@ -32,6 +32,7 @@ export type {
   RoomUserData,
   ShareData,
   SubscribeData,
+  SuperChatData,
   SuperFanData,
   SuperFanJoinData,
   TopGifter,
