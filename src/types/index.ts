@@ -1,14 +1,19 @@
 import {
   ChatData,
+  CheerData,
   FansData,
   FollowData,
   GiftData,
   GiftersData,
+  GiftSubData,
   LikeData,
   MemberJoinData,
   MusicChangeData,
+  RaidData,
+  RedeemData,
   RoomUserData,
   ShareData,
+  SubscribeData,
   SuperFanData,
   SuperFanJoinData,
 } from "./events";
@@ -58,6 +63,12 @@ export enum TOKIO_EVENTS {
   SUPER_FAN_JOIN = "tokio:event:superfanjoin",
   MEMBER_JOIN = "tokio:event:memberjoin",
   ROOM_USER = "tokio:event:roomuser",
+  // Twitch's
+  SUBSCRIBE = "tokio:event:subscribe",
+  GIFT_SUB = "tokio:event:giftsub",
+  CHEER = "tokio:event:cheer",
+  RAID = "tokio:event:raid",
+  REDEEM = "tokio:event:redeem",
   MUSIC_CHANGE = "tokio:event:music:change",
 }
 
@@ -79,6 +90,11 @@ export interface EventMap {
   [TOKIO_EVENTS.MEMBER_JOIN]: MemberJoinData;
   [TOKIO_EVENTS.SUPER_FAN_JOIN]: SuperFanJoinData;
   [TOKIO_EVENTS.ROOM_USER]: RoomUserData;
+  [TOKIO_EVENTS.SUBSCRIBE]: SubscribeData;
+  [TOKIO_EVENTS.GIFT_SUB]: GiftSubData;
+  [TOKIO_EVENTS.CHEER]: CheerData;
+  [TOKIO_EVENTS.RAID]: RaidData;
+  [TOKIO_EVENTS.REDEEM]: RedeemData;
   [TOKIO_EVENTS.MUSIC_CHANGE]: MusicChangeData;
 }
 

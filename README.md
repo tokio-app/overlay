@@ -1,8 +1,8 @@
 # Tokio Overlays Handler
 
-Receive TikTok LIVE events from [Tokio](https://tokio.ialfaro.com) in your stream overlays.
+Receive TikTok and Twitch LIVE events from [Tokio](https://tokio.ialfaro.com) in your stream overlays.
 
-Tokio connects to a TikTok LIVE and sends its events (chat, gifts, likes, follows, music requests and more) to overlays over a local WebSocket. This library connects to it, reconnects when Tokio restarts, and hands you each event with typed data. It also receives the events Tokio's previews post to the overlay's iframe, so every overlay you import into Tokio needs it.
+Tokio connects to a TikTok or Twitch LIVE, or both at once, and sends its events (chat, gifts, likes, follows, subscriptions, music requests and more) to overlays over a local WebSocket. This library connects to it, reconnects when Tokio restarts, and hands you each event with typed data. It also receives the events Tokio's previews post to the overlay's iframe, so every overlay you import into Tokio needs it.
 
 It has no dependencies and ships an ES module, a CommonJS build and a browser build, with TypeScript types. Formerly `tokio-event-loader`.
 
@@ -145,20 +145,25 @@ Use the `TOKIO_EVENTS` constants. Messages with an unknown event are logged and 
 
 ### LIVE events
 
-| Constant         | Event name                 | Sent when                               |
-| ---------------- | -------------------------- | --------------------------------------- |
-| `CHAT`           | `tokio:event:chat`         | A viewer sends a chat message           |
-| `FOLLOW`         | `tokio:event:follow`       | A viewer follows you                    |
-| `SHARE`          | `tokio:event:share`        | A viewer shares the LIVE                |
-| `LIKE`           | `tokio:event:like`         | A viewer likes the LIVE                 |
-| `GIFT`           | `tokio:event:gift`         | A viewer sends a gift                   |
-| `ENVELOPE`       | `tokio:event:envelope`     | A treasure envelope is sent             |
-| `SUPER_FAN`      | `tokio:event:superfan`     | A viewer becomes a Super Fan            |
-| `SUPER_FAN_BOX`  | `tokio:event:superfanbox`  | A Super Fan box is sent                 |
-| `SUPER_FAN_JOIN` | `tokio:event:superfanjoin` | A Super Fan joins the LIVE              |
-| `MEMBER_JOIN`    | `tokio:event:memberjoin`   | A viewer joins the LIVE                 |
-| `ROOM_USER`      | `tokio:event:roomuser`     | The viewer count and top viewers change |
-| `MUSIC_CHANGE`   | `tokio:event:music:change` | The music request queue changes         |
+| Constant         | Event name                 | Sent when                                |
+| ---------------- | -------------------------- | ---------------------------------------- |
+| `CHAT`           | `tokio:event:chat`         | A viewer sends a chat message            |
+| `FOLLOW`         | `tokio:event:follow`       | A viewer follows you                     |
+| `SHARE`          | `tokio:event:share`        | A viewer shares the LIVE                 |
+| `LIKE`           | `tokio:event:like`         | A viewer likes the LIVE                  |
+| `GIFT`           | `tokio:event:gift`         | A viewer sends a gift                    |
+| `ENVELOPE`       | `tokio:event:envelope`     | A treasure envelope is sent              |
+| `SUPER_FAN`      | `tokio:event:superfan`     | A viewer becomes a Super Fan             |
+| `SUPER_FAN_BOX`  | `tokio:event:superfanbox`  | A Super Fan box is sent                  |
+| `SUPER_FAN_JOIN` | `tokio:event:superfanjoin` | A Super Fan joins the LIVE               |
+| `MEMBER_JOIN`    | `tokio:event:memberjoin`   | A viewer joins the LIVE                  |
+| `ROOM_USER`      | `tokio:event:roomuser`     | The viewer count and top viewers change  |
+| `SUBSCRIBE`      | `tokio:event:subscribe`    | A viewer subscribes or renews            |
+| `GIFT_SUB`       | `tokio:event:giftsub`      | A viewer gifts subscriptions to others   |
+| `CHEER`          | `tokio:event:cheer`        | A viewer spends Bits                     |
+| `RAID`           | `tokio:event:raid`         | Another channel raids you                |
+| `REDEEM`         | `tokio:event:redeem`       | A viewer redeems a channel points reward |
+| `MUSIC_CHANGE`   | `tokio:event:music:change` | The music request queue changes          |
 
 ### Library events
 
@@ -186,6 +191,11 @@ Each event's data has a type named after it:
 | `SUPER_FAN_JOIN`                    | `SuperFanJoinData` | `{ user }`                                                                |
 | `MEMBER_JOIN`                       | `MemberJoinData`   | `{ user }`                                                                |
 | `ROOM_USER`                         | `RoomUserData`     | `{ views, viewers, ranks: (UserData & { score, position })[] }`           |
+| `SUBSCRIBE`                         | `SubscribeData`    | `{ user, tier, months, message }`                                         |
+| `GIFT_SUB`                          | `GiftSubData`      | `{ user, count, tier }`                                                   |
+| `CHEER`                             | `CheerData`        | `{ user, bits, message }`                                                 |
+| `RAID`                              | `RaidData`         | `{ user, viewers }`                                                       |
+| `REDEEM`                            | `RedeemData`       | `{ user, reward: { id, title, cost }, input }`                            |
 | `MUSIC_CHANGE`                      | `MusicChangeData`  | The whole queue, `MusicInfo[]`: `{ title, thumbnail, playing, played }`   |
 | `CLOSE`                             | `CloseData`        | `{ code, reason, wasClean }`                                              |
 | `ERROR`                             | `ErrorData`        | `{ type: "error", message, error }`                                       |
@@ -206,9 +216,23 @@ interface UserData {
   moderator?: boolean;
   fanLevel?: number;
   fanBadge?: string; // the picture of the fan level's badge
-  userId?: string; // TikTok's id, which stays when the handle changes
+  userId?: string; // the platform's id, which stays when the handle changes
+  platform?: "tiktok" | "twitch"; // missing means TikTok
 }
 ```
+
+Tokio can connect to TikTok and Twitch in the same LIVE, so `user.platform` says where a viewer is. It's missing for TikTok viewers. A Twitch viewer's `userId` starts with `twitch:`, like `twitch:1234`, so it never matches a TikTok one.
+
+Each platform sends some events:
+
+| Event                                                                                              | From              |
+| -------------------------------------------------------------------------------------------------- | ----------------- |
+| `CHAT`, `FOLLOW`                                                                                   | TikTok and Twitch |
+| `SHARE`, `LIKE`, `GIFT`, `ENVELOPE`, `SUPER_FAN`, `SUPER_FAN_BOX`, `SUPER_FAN_JOIN`, `MEMBER_JOIN` | TikTok            |
+| `SUBSCRIBE`, `GIFT_SUB`, `CHEER`, `RAID`, `REDEEM`                                                 | Twitch            |
+| `ROOM_USER`                                                                                        | Both, summed      |
+
+`ROOM_USER` adds up `viewers` and `views` over the connected platforms, and its `ranks` are TikTok's. Twitch has no `views`, so it adds 0. On a Twitch `CHAT`, `moderator` is true for your moderators and for you, `superfan` for your subscribers, and `follower` is always `false`, since Twitch's chat doesn't say who follows. Its other events leave `moderator` and `superfan` out. `SUBSCRIBE`'s `tier` is Twitch's own: `"1000"`, `"2000"`, `"3000"` or `"prime"`. `RAID`'s `user` is the raiding channel's streamer, and `viewers` the people they sent. In Tokio's previews, the Twitch events come as samples when you click **Test**.
 
 `fanBadge` is the picture TikTok shows for the fan level: a heart that changes every 10 levels, without the number, so draw `fanLevel` next to it. It's `""` for a viewer who isn't a fan.
 
@@ -218,7 +242,7 @@ interface UserData {
 
 `MUSIC_CHANGE` brings the whole song request queue, in order: the songs already played, the one playing (`playing: true`), then the ones waiting. Tokio sends it each time the queue changes, when its last song ends, and as the overlay connects while the queue has songs. When no song is playing, the queue is empty or its last song ended. `title` is the song and its artists, as `Song - Artist`. Tokio can't tell when a song is paused, so `playing` only marks where the queue is. In Tokio's previews, `MUSIC_CHANGE` comes as a sample when you click **Test**.
 
-A chat's `content` is what the viewer typed, and `lang` is the language TikTok tagged it with, `""` when it didn't. When the streamer turns on **Chat translation** in Tokio's Settings, a message TikTok tagged with another language comes with `translation`: `{ text, from, to }`, the translated text and the two languages as lowercase codes, like `en` and `es`. It's left out for messages already in the streamer's language, chat commands, and messages Tokio couldn't translate, so fall back to `content`. In Tokio's previews, some sample chats carry one when you click **Test**.
+A chat's `content` is what the viewer typed, and `lang` is the language TikTok tagged it with, `""` when it didn't. Twitch's chat has no language tag, so `lang` is always `""` and there's no `translation`. Its `content` leaves out the emotes' codes and cheermotes, each emote's `emoteID` starts with `twitch:` and its `images` are Twitch's, and a Twitch chatter has no profile pictures. A cheer, subscription or gift from an anonymous viewer comes with the username `Anonymous` and no `userId`. When the streamer turns on **Chat translation** in Tokio's Settings, a message TikTok tagged with another language comes with `translation`: `{ text, from, to }`, the translated text and the two languages as lowercase codes, like `en` and `es`. It's left out for messages already in the streamer's language, chat commands, and messages Tokio couldn't translate, so fall back to `content`. In Tokio's previews, some sample chats carry one when you click **Test**.
 
 Each chat emote is `{ emoteID, index, images }`. An emote's `index` points into `content`, not the translation. A gift's `image` is the URL of its picture. A gift setting in `ConfigData` is a `CustomGift`: `{ value, label, img, coins }`. A table setting is a list of rows, each an object of its cells keyed by column id, every cell read like a setting of its type. A font setting is a font's name, or `""` for your overlay's own font.
 

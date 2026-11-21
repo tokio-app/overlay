@@ -9,8 +9,12 @@ export interface UserData {
   // The picture of the fan level's badge: a heart that changes every 10
   // levels, without the number. Draw fanLevel next to it.
   fanBadge?: string;
-  // TikTok's id for the account, which stays when the handle changes.
+  // The platform's id for the account, which stays when the handle changes.
+  // Other platforms' start with their name ("twitch:1234"), so they never
+  // match TikTok's, which are saved bare.
   userId?: string;
+  // Where the viewer is. Missing means TikTok.
+  platform?: "tiktok" | "twitch";
 }
 
 // A chat message translated by Tokio's Chat translation. Codes are lowercase
@@ -84,6 +88,47 @@ export interface LikeData {
   totalLikes: number;
 }
 
+// A paid subscription, new or renewed, on Twitch
+export interface SubscribeData {
+  user: UserData;
+  // The platform's own tier: "1000", "2000", "3000" or "prime"; "" when it
+  // has none
+  tier: string;
+  // Months subscribed so far, 1 for a new one
+  months: number;
+  // What the viewer wrote with it, "" for nothing
+  message: string;
+}
+
+// Subscriptions a viewer gave to others, all at once
+export interface GiftSubData {
+  user: UserData;
+  count: number;
+  tier: string;
+}
+
+// Bits a viewer spent on Twitch: a cheer, or a Power-up
+export interface CheerData {
+  user: UserData;
+  bits: number;
+  // A cheer's message without its cheermotes, "" for none
+  message: string;
+}
+
+// Another channel sending its viewers over: the user is its streamer
+export interface RaidData {
+  user: UserData;
+  viewers: number;
+}
+
+// A channel points reward a viewer redeemed on Twitch
+export interface RedeemData {
+  user: UserData;
+  reward: { id: string; title: string; cost: number };
+  // What the reward asked the viewer to type, "" for none
+  input: string;
+}
+
 export type MusicInfo = {
   title: string;
   thumbnail: string;
@@ -129,6 +174,8 @@ export interface TopGifter {
   allTime: { coins: number; gifts: number };
   // When their last gift came, in ms since the epoch.
   giftedAt: number;
+  // Missing means TikTok
+  platform?: "tiktok" | "twitch";
 }
 
 // The top 10 by coins: in this LIVE ([] while Tokio isn't connected), and
