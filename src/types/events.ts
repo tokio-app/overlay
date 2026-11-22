@@ -10,12 +10,14 @@ export interface UserData {
   // levels, without the number. Draw fanLevel next to it.
   fanBadge?: string;
   // The platform's id for the account, which stays when the handle changes.
-  // Other platforms' start with their name ("twitch:1234", "youtube:UC…"),
-  // so they never match TikTok's, which are saved bare. A YouTube Gift's
-  // sender has no channel id in its chat, so theirs is "youtube:@handle".
+  // Other platforms' start with their name ("twitch:1234", "youtube:UC…",
+  // "kick:1234"), so they never match TikTok's, which are saved bare. A
+  // YouTube Gift's sender has no channel id in its chat, so theirs is
+  // "youtube:@handle". Kick's subscriptions, gifted subs and hosts name
+  // people only by username, so those users have none.
   userId?: string;
   // Where the viewer is. Missing means TikTok.
-  platform?: "tiktok" | "twitch" | "youtube";
+  platform?: "tiktok" | "twitch" | "youtube" | "kick";
 }
 
 // A chat message translated by Tokio's Chat translation. Codes are lowercase
@@ -89,11 +91,12 @@ export interface LikeData {
   totalLikes: number;
 }
 
-// A paid subscription, new or renewed: Twitch's, or a YouTube membership
+// A paid subscription, new or renewed: Twitch's, Kick's, or a YouTube
+// membership
 export interface SubscribeData {
   user: UserData;
   // The platform's own tier: "1000", "2000", "3000" or "prime" on Twitch;
-  // "" on YouTube, whose channels name their own levels
+  // "" on YouTube, whose channels name their own levels, and on Kick
   tier: string;
   // Months subscribed so far, 1 for a new one
   months: number;
@@ -116,13 +119,15 @@ export interface CheerData {
   message: string;
 }
 
-// Another channel sending its viewers over: the user is its streamer
+// Another channel sending its viewers over, a Twitch raid or a Kick host:
+// the user is its streamer
 export interface RaidData {
   user: UserData;
   viewers: number;
 }
 
-// A channel points reward a viewer redeemed on Twitch
+// A channel points reward a viewer redeemed on Twitch, or a Kick channel
+// reward
 export interface RedeemData {
   user: UserData;
   reward: { id: string; title: string; cost: number };
@@ -187,7 +192,7 @@ export interface TopGifter {
   // When their last gift came, in ms since the epoch.
   giftedAt: number;
   // Missing means TikTok
-  platform?: "tiktok" | "twitch";
+  platform?: "tiktok" | "twitch" | "youtube" | "kick";
 }
 
 // The top 10 by coins: in this LIVE ([] while Tokio isn't connected), and

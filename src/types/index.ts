@@ -64,7 +64,7 @@ export enum TOKIO_EVENTS {
   SUPER_FAN_JOIN = "tokio:event:superfanjoin",
   MEMBER_JOIN = "tokio:event:memberjoin",
   ROOM_USER = "tokio:event:roomuser",
-  // Twitch's
+  // Twitch's and Kick's, but CHEER is Twitch's alone
   SUBSCRIBE = "tokio:event:subscribe",
   GIFT_SUB = "tokio:event:giftsub",
   CHEER = "tokio:event:cheer",
