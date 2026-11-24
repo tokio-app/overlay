@@ -14,9 +14,9 @@ export interface UserData {
   // The platform's id for the account, which stays when the handle changes.
   // Other platforms' start with their name ("twitch:1234", "youtube:UC…",
   // "kick:1234"), so they never match TikTok's, which are saved bare. A
-  // YouTube Gift's sender has no channel id in its chat, so theirs is
-  // "youtube:@handle". Kick's subscriptions, gifted subs and hosts name
-  // people only by username, so those users have none.
+  // YouTube Gift's sender gets the channel id Tokio saw in the LIVE, else
+  // "youtube:@handle". Kick's subscriptions and gifted subs get the id Tokio
+  // finds for the username, and its hosts and rewards come without one.
   userId?: string;
   // Where the viewer is. Missing means TikTok.
   platform?: "tiktok" | "twitch" | "youtube" | "kick";

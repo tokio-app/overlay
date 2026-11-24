@@ -227,7 +227,7 @@ interface UserData {
 }
 ```
 
-Tokio can connect to TikTok, Twitch, YouTube and Kick in the same LIVE, so `user.platform` says where a viewer is. It's missing for TikTok viewers. A Twitch viewer's `userId` starts with `twitch:`, like `twitch:1234`, and a YouTube viewer's is `youtube:` and their channel id, like `youtube:UC…`, so they never match a TikTok one. YouTube's chat doesn't give a Gift's sender's channel id, so theirs is `youtube:@handle`. A Kick chatter's and a Kicks sender's `userId` is `kick:` and their Kick id. Kick's subscriptions, gifted subs and hosts name people only by username, so those users have no `userId`.
+Tokio can connect to TikTok, Twitch, YouTube and Kick in the same LIVE, so `user.platform` says where a viewer is. It's missing for TikTok viewers. A Twitch viewer's `userId` starts with `twitch:`, like `twitch:1234`, and a YouTube viewer's is `youtube:` and their channel id, like `youtube:UC…`, so they never match a TikTok one. YouTube's chat doesn't give a Gift's sender's channel id, so Tokio uses the one it saw on their other events in the LIVE, and otherwise `youtube:@handle`. A Kick chatter's and a Kicks sender's `userId` is `kick:` and their Kick id. Kick's subscriptions and gifted subs name people only by username, so Tokio finds their id in the LIVE's chat or looks up their channel, and sends the event without one when that fails. Kick's hosts and channel rewards come without a `userId`.
 
 Each platform sends some events:
 
