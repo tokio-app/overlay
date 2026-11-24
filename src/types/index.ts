@@ -6,6 +6,7 @@ import {
   GiftData,
   GiftersData,
   GiftSubData,
+  KicksData,
   LikeData,
   MemberJoinData,
   MusicChangeData,
@@ -72,6 +73,8 @@ export enum TOKIO_EVENTS {
   REDEEM = "tokio:event:redeem",
   // YouTube's
   SUPER_CHAT = "tokio:event:superchat",
+  // Kick's
+  KICKS = "tokio:event:kicks",
   MUSIC_CHANGE = "tokio:event:music:change",
 }
 
@@ -99,6 +102,7 @@ export interface EventMap {
   [TOKIO_EVENTS.RAID]: RaidData;
   [TOKIO_EVENTS.REDEEM]: RedeemData;
   [TOKIO_EVENTS.SUPER_CHAT]: SuperChatData;
+  [TOKIO_EVENTS.KICKS]: KicksData;
   [TOKIO_EVENTS.MUSIC_CHANGE]: MusicChangeData;
 }
 

@@ -23,6 +23,7 @@ export type {
   GiftData,
   GiftersData,
   GiftSubData,
+  KicksData,
   LikeData,
   MemberJoinData,
   MusicChangeData,

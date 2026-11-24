@@ -5,6 +5,8 @@ export interface UserData {
   superfan?: boolean;
   follower?: boolean;
   moderator?: boolean;
+  // A VIP of the channel, on a Twitch or Kick chat
+  vip?: boolean;
   fanLevel?: number;
   // The picture of the fan level's badge: a heart that changes every 10
   // levels, without the number. Draw fanLevel next to it.
@@ -18,6 +20,9 @@ export interface UserData {
   userId?: string;
   // Where the viewer is. Missing means TikTok.
   platform?: "tiktok" | "twitch" | "youtube" | "kick";
+  // Months subscribed (Twitch, Kick) or a member (YouTube), when their badge
+  // says so. YouTube's badge says only its milestone: 1 year is 12.
+  subMonths?: number;
 }
 
 // A chat message translated by Tokio's Chat translation. Codes are lowercase
@@ -119,6 +124,14 @@ export interface CheerData {
   message: string;
 }
 
+// KICKs a viewer sent on Kick, like Twitch's Bits
+export interface KicksData {
+  user: UserData;
+  kicks: number;
+  // The message they pinned with them, "" for none
+  message: string;
+}
+
 // Another channel sending its viewers over, a Twitch raid or a Kick host:
 // the user is its streamer
 export interface RaidData {
@@ -144,6 +157,9 @@ export interface SuperChatData {
   message: string;
   // A Super Sticker's picture, "" for a Super Chat
   sticker: string;
+  // What it's worth in US dollars at the day's exchange rates, null when
+  // Tokio can't read the amount or hasn't got the rates for its currency
+  usd?: number | null;
 }
 
 export type MusicInfo = {
@@ -175,9 +191,9 @@ export interface FansData {
   fans: Fan[];
 }
 
-// A viewer who sent gifts, with their coins and gifts in this LIVE and in
-// every LIVE the profile kept. Only gifts count, not treasure chests or Super
-// Fan subscriptions.
+// A viewer who sent gifts on TikTok, with their coins and gifts in this LIVE
+// and in every LIVE the profile kept. Only gifts count, not treasure chests
+// or Super Fan subscriptions.
 export interface TopGifter {
   userId: string;
   username: string;
@@ -197,7 +213,8 @@ export interface TopGifter {
 
 // The top 10 by coins: in this LIVE ([] while Tokio isn't connected), and
 // across every LIVE the profile kept, this one included. Ties go to whoever
-// got there first.
+// got there first. Only TikTok's gifters: YouTube's Gifts have no price, and
+// Bits, Kicks and Super Chats aren't coins.
 export interface GiftersData {
   live: TopGifter[];
   allTime: TopGifter[];
