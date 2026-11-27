@@ -1,7 +1,7 @@
 {
   "name": "@tokioapp/overlay",
-  "version": "1.4.0",
-  "description": "Receive TikTok LIVE events from Tokio in your stream overlays.",
+  "version": "1.5.0",
+  "description": "Receive TikTok, Twitch, YouTube and Kick LIVE events from Tokio in your stream overlays.",
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.es.js",
@@ -38,6 +38,9 @@
   },
   "keywords": [
     "tiktok",
+    "twitch",
+    "youtube",
+    "kick",
     "overlays",
     "alerts",
     "tokio"
