@@ -108,7 +108,7 @@ Before you import the overlay, its ID is still empty. To test it:
 1. In Tokio, turn on **Settings → Overlay Server**.
 2. Create an ID under **Tools → Test Overlays**.
 3. Connect with it, for example `tokio.connect("<test ID>")`, and open the overlay in your browser.
-4. Click **Test**. Tokio sends your overlay every LIVE event your profile's platforms send, each as its platform sends it, and with TikTok a sample of the fans and top gifters. The events carry on from your last test: the same viewers come back, likes and coins add up, and a gift streak grows over a few clicks before it ends.
+4. Click **Test**. Tokio sends your overlay every LIVE event your profile's platforms send, each as its platform sends it, the platforms the LIVE is on, and with TikTok a sample of the fans and top gifters. The events carry on from your last test: the same viewers come back, likes and coins add up, and a gift streak grows over a few clicks before it ends.
 
 Switch back to `window.__OVERLAY_ID__` before you import it.
 
@@ -177,36 +177,38 @@ Use the `TOKIO_EVENTS` constants. Messages with an unknown event are logged and 
 | `CONFIG`  | `tokio:config`  | The streamer saves the overlay's settings                                                 |
 | `FANS`    | `tokio:fans`    | The overlay connects, and again when the fans Tokio keeps change, at most every 5 seconds |
 | `GIFTERS` | `tokio:gifters` | The overlay connects, and again when the top gifters change, at most once a second        |
+| `LIVE`    | `tokio:live`    | The overlay connects, a LIVE starts or ends, and a platform joins or leaves it            |
 
 ### Data
 
 Each event's data has a type named after it:
 
-| Event                               | Type               | Data                                                                      |
-| ----------------------------------- | ------------------ | ------------------------------------------------------------------------- |
-| `CHAT`                              | `ChatData`         | `{ user, comment: { content, emotes, lang, translation? } }`              |
-| `FOLLOW`                            | `FollowData`       | `{ user }`                                                                |
-| `SHARE`                             | `ShareData`        | `{ user, shareCount }`                                                    |
-| `LIKE`                              | `LikeData`         | `{ user, likeCount, totalLikes }`                                         |
-| `GIFT`                              | `GiftData`         | `{ user, gift: { id, name, coins, type, comboCount, repeatEnd, image } }` |
-| `SUPER_FAN`                         | `SuperFanData`     | `{ user }`                                                                |
-| `SUPER_FAN_JOIN`                    | `SuperFanJoinData` | `{ user }`                                                                |
-| `MEMBER_JOIN`                       | `MemberJoinData`   | `{ user }`                                                                |
-| `ROOM_USER`                         | `RoomUserData`     | `{ views, viewers, ranks: (UserData & { score, position })[] }`           |
-| `SUBSCRIBE`                         | `SubscribeData`    | `{ user, tier, months, message }`                                         |
-| `GIFT_SUB`                          | `GiftSubData`      | `{ user, count, tier }`                                                   |
-| `CHEER`                             | `CheerData`        | `{ user, bits, message }`                                                 |
-| `RAID`                              | `RaidData`         | `{ user, viewers }`                                                       |
-| `REDEEM`                            | `RedeemData`       | `{ user, reward: { id, title, cost }, input }`                            |
-| `SUPER_CHAT`                        | `SuperChatData`    | `{ user, amount, message, sticker, usd }`                                 |
-| `KICKS`                             | `KicksData`        | `{ user, kicks, message }`                                                |
-| `MUSIC_CHANGE`                      | `MusicChangeData`  | The whole queue, `MusicInfo[]`: `{ title, thumbnail, playing, played }`   |
-| `CLOSE`                             | `CloseData`        | `{ code, reason, wasClean }`                                              |
-| `ERROR`                             | `ErrorData`        | `{ type: "error", message, error }`                                       |
-| `CONFIG`                            | `ConfigData`       | The settings, the same object as `window.__OVERLAY_CONFIG__`              |
-| `FANS`                              | `FansData`         | `{ fans: Fan[] }`, see below                                              |
-| `GIFTERS`                           | `GiftersData`      | `{ live: TopGifter[], allTime: TopGifter[] }`, see below                  |
-| `ENVELOPE`, `SUPER_FAN_BOX`, `OPEN` |                    | none                                                                      |
+| Event                               | Type               | Data                                                                                  |
+| ----------------------------------- | ------------------ | ------------------------------------------------------------------------------------- |
+| `CHAT`                              | `ChatData`         | `{ user, comment: { content, emotes, lang, translation? } }`                          |
+| `FOLLOW`                            | `FollowData`       | `{ user }`                                                                            |
+| `SHARE`                             | `ShareData`        | `{ user, shareCount }`                                                                |
+| `LIKE`                              | `LikeData`         | `{ user, likeCount, totalLikes }`                                                     |
+| `GIFT`                              | `GiftData`         | `{ user, gift: { id, name, coins, type, comboCount, repeatEnd, image } }`             |
+| `SUPER_FAN`                         | `SuperFanData`     | `{ user }`                                                                            |
+| `SUPER_FAN_JOIN`                    | `SuperFanJoinData` | `{ user }`                                                                            |
+| `MEMBER_JOIN`                       | `MemberJoinData`   | `{ user }`                                                                            |
+| `ROOM_USER`                         | `RoomUserData`     | `{ views, viewers, ranks: (UserData & { score, position })[], platforms }`, see below |
+| `SUBSCRIBE`                         | `SubscribeData`    | `{ user, tier, months, message }`                                                     |
+| `GIFT_SUB`                          | `GiftSubData`      | `{ user, count, tier }`                                                               |
+| `CHEER`                             | `CheerData`        | `{ user, bits, message }`                                                             |
+| `RAID`                              | `RaidData`         | `{ user, viewers }`                                                                   |
+| `REDEEM`                            | `RedeemData`       | `{ user, reward: { id, title, cost }, input }`                                        |
+| `SUPER_CHAT`                        | `SuperChatData`    | `{ user, amount, message, sticker, usd }`                                             |
+| `KICKS`                             | `KicksData`        | `{ user, kicks, message }`                                                            |
+| `MUSIC_CHANGE`                      | `MusicChangeData`  | The whole queue, `MusicInfo[]`: `{ title, thumbnail, playing, played }`               |
+| `CLOSE`                             | `CloseData`        | `{ code, reason, wasClean }`                                                          |
+| `ERROR`                             | `ErrorData`        | `{ type: "error", message, error }`                                                   |
+| `CONFIG`                            | `ConfigData`       | The settings, the same object as `window.__OVERLAY_CONFIG__`                          |
+| `FANS`                              | `FansData`         | `{ fans: Fan[] }`, see below                                                          |
+| `GIFTERS`                           | `GiftersData`      | `{ live: TopGifter[], allTime: TopGifter[] }`, see below                              |
+| `LIVE`                              | `LiveData`         | `{ platforms: { platform, channel }[] }`, see below                                   |
+| `ENVELOPE`, `SUPER_FAN_BOX`, `OPEN` |                    | none                                                                                  |
 
 `user` is the viewer who triggered the event:
 
@@ -222,29 +224,31 @@ interface UserData {
   fanLevel?: number;
   fanBadge?: string; // the picture of the fan level's badge
   userId?: string; // the platform's id, which stays when the handle changes
-  platform?: "tiktok" | "twitch" | "youtube" | "kick"; // missing means TikTok
+  platform: "tiktok" | "twitch" | "youtube" | "kick"; // where the viewer is
   subMonths?: number; // months subscribed or a member, from their badge
 }
 ```
 
-Tokio can connect to TikTok, Twitch, YouTube and Kick in the same LIVE, so `user.platform` says where a viewer is. It's missing for TikTok viewers. A Twitch viewer's `userId` starts with `twitch:`, like `twitch:1234`, and a YouTube viewer's is `youtube:` and their channel id, like `youtube:UC…`, so they never match a TikTok one. Tokio takes a YouTube Gift's sender's channel id from the card YouTube shows with the Gift, or from their other events in the LIVE, and otherwise uses `youtube:@handle`. A Kick chatter's and a Kicks sender's `userId` is `kick:` and their Kick id. Kick's subscriptions and gifted subs name people only by username, so Tokio finds their id in the LIVE's chat or looks up their channel, and sends the event without one when that fails. Kick's hosts and channel rewards come without a `userId`.
+Tokio can connect to TikTok, Twitch, YouTube and Kick in the same LIVE, so `user.platform` says where a viewer is. Tokio leaves it out for TikTok viewers, and the library fills in `"tiktok"`, so it's always there. A Twitch viewer's `userId` starts with `twitch:`, like `twitch:1234`, and a YouTube viewer's is `youtube:` and their channel id, like `youtube:UC…`, so they never match a TikTok one. Tokio takes a YouTube Gift's sender's channel id from the card YouTube shows with the Gift, or from their other events in the LIVE, and otherwise uses `youtube:@handle`. A Kick chatter's and a Kicks sender's `userId` is `kick:` and their Kick id. Kick's subscriptions and gifted subs name people only by username, so Tokio finds their id in the LIVE's chat or looks up their channel, and sends the event without one when that fails. Kick's hosts and channel rewards come without a `userId`.
 
 Each platform sends some events:
 
-| Event                                                                                      | From                             |
-| ------------------------------------------------------------------------------------------ | -------------------------------- |
-| `CHAT`                                                                                     | TikTok, Twitch, YouTube and Kick |
-| `FOLLOW`                                                                                   | TikTok and Twitch                |
-| `GIFT`                                                                                     | TikTok and YouTube               |
-| `SUBSCRIBE`, `GIFT_SUB`                                                                    | Twitch, YouTube and Kick         |
-| `RAID`, `REDEEM`                                                                           | Twitch and Kick                  |
-| `SHARE`, `LIKE`, `ENVELOPE`, `SUPER_FAN`, `SUPER_FAN_BOX`, `SUPER_FAN_JOIN`, `MEMBER_JOIN` | TikTok                           |
-| `CHEER`                                                                                    | Twitch                           |
-| `SUPER_CHAT`                                                                               | YouTube                          |
-| `KICKS`                                                                                    | Kick                             |
-| `ROOM_USER`                                                                                | All of them, summed              |
+| Event                                                                                      | From                               |
+| ------------------------------------------------------------------------------------------ | ---------------------------------- |
+| `CHAT`                                                                                     | TikTok, Twitch, YouTube and Kick   |
+| `FOLLOW`                                                                                   | TikTok and Twitch                  |
+| `GIFT`                                                                                     | TikTok and YouTube                 |
+| `SUBSCRIBE`, `GIFT_SUB`                                                                    | Twitch, YouTube and Kick           |
+| `RAID`, `REDEEM`                                                                           | Twitch and Kick                    |
+| `SHARE`, `LIKE`, `ENVELOPE`, `SUPER_FAN`, `SUPER_FAN_BOX`, `SUPER_FAN_JOIN`, `MEMBER_JOIN` | TikTok                             |
+| `CHEER`                                                                                    | Twitch                             |
+| `SUPER_CHAT`                                                                               | YouTube                            |
+| `KICKS`                                                                                    | Kick                               |
+| `ROOM_USER`                                                                                | All of them, summed and each apart |
 
-`ROOM_USER` adds up `viewers` and `views` over the connected platforms, and its `ranks` are TikTok's. Twitch, YouTube and Kick have no `views`, so they add 0. On a Twitch `CHAT`, `moderator` is true for your moderators and for you, `superfan` for your subscribers, `vip` for your VIPs, and `follower` is always `false`, since Twitch's chat doesn't say who follows. A subscriber's `subMonths` is the months their badge shows. Its other events leave `moderator`, `superfan`, `vip` and `subMonths` out. `SUBSCRIBE`'s `tier` is Twitch's own: `"1000"`, `"2000"`, `"3000"` or `"prime"`. `RAID`'s `user` is the raiding channel's streamer, and `viewers` the people they sent.
+`ROOM_USER` adds up `viewers` and `views` over the connected platforms, and `platforms` has each one's own, as `{ platform, viewers, views }`, in the order TikTok, Twitch, YouTube, Kick. Its `ranks` are TikTok's. Twitch, YouTube and Kick have no `views`, so theirs are 0. An older Tokio sends no `platforms` and connects only to TikTok, so the library gives it TikTok's alone.
+
+On a Twitch `CHAT`, `moderator` is true for your moderators and for you, `superfan` for your subscribers, `vip` for your VIPs, and `follower` is always `false`, since Twitch's chat doesn't say who follows. A subscriber's `subMonths` is the months their badge shows. Its other events leave `moderator`, `superfan`, `vip` and `subMonths` out. `SUBSCRIBE`'s `tier` is Twitch's own: `"1000"`, `"2000"`, `"3000"` or `"prime"`. `RAID`'s `user` is the raiding channel's streamer, and `viewers` the people they sent.
 
 On a YouTube `CHAT`, `moderator` is true for your channel's moderators and for you, `superfan` for its members, and `follower` is always `false`, since YouTube has no followers. A member's badge shows only a milestone, so their `subMonths` is that: 1 year is 12. A member's custom emojis come as emotes, and standard emojis stay in `content`. On YouTube, `SUBSCRIBE` is a membership: a new member, or a milestone with its `months`. Channels name their own membership levels, so its `tier` is `""`, as is `GIFT_SUB`'s, and a `GIFT_SUB` comes once for the whole gift. `SUPER_CHAT`'s `amount` is what the viewer paid, as YouTube shows it, like `"$4.99"`, and amounts can be in different currencies, so add up `usd` instead: the amount in US dollars at the day's exchange rates, or `null` when Tokio can't read the amount or hasn't got the rates for its currency. Its `message` is `""` for a Super Sticker, and `sticker` is the Super Sticker's picture URL, `""` for a Super Chat. A YouTube Gift, bought with Jewels, comes as `GIFT` with an `id` of `youtube:` and its picture's file name, like `youtube:vicecity_heart_v2`, and `coins: 0`, since YouTube doesn't say what it costs. A combo, the same Gift sent several times in a row, comes as one `GIFT` with `comboCount` set to how many, and `repeatEnd` is always `true`.
 
@@ -254,7 +258,9 @@ On a Kick `CHAT`, `moderator` is true for your moderators and for you, `superfan
 
 `FANS` lists the fans the streamer's profile has seen in its LIVEs. TikTok only sends a viewer's fan level when they do something, so this is how an overlay shows fans it hasn't seen since it loaded. It has up to 100, the highest `fanLevel` first, then the most recently seen. Each `Fan` is `{ userId, username, handle, fanLevel, fanBadge, superfan, seenAt }`, with `seenAt` in milliseconds since the epoch. `superfan` says whether they're a Super Fan, as their last chat, gift or Super Fan event said. Fans have no profile picture, since TikTok's links to them expire within a couple of days; for a fan in the LIVE, take it from the `user` of their events. The badge's links don't expire. In Tokio's previews, `FANS` comes as a sample when you click **Test**.
 
-`GIFTERS` brings the top gifters. `live` is this LIVE's top 10 by `live.coins`, and `[]` while Tokio isn't connected. `allTime` is the top 10 by `allTime.coins` across every LIVE the streamer's profile kept, this one included. Ties go to whoever got there first. Tokio sends it as the overlay connects, after a profile loads, when a LIVE starts or ends, when a LIVE is deleted or the history cleared, and on gifts, at most once a second. Each `TopGifter` is `{ userId, username, handle, picture, live, allTime, giftedAt }`, with `live` and `allTime` as `{ coins, gifts }`. `live` is 0 coins and 0 gifts for someone who hasn't sent gifts in this LIVE. Only gifts count as coins: treasure chests and Super Fan subscriptions don't. Only TikTok viewers show in `GIFTERS`: YouTube's Gifts have no price, and Bits, Kicks and Super Chats aren't coins. `giftedAt` is when their last gift came, in milliseconds since the epoch. `picture` is TikTok's link from the viewer's latest gift, or `""` when TikTok sent none. TikTok's links expire about 2 days after it sends them, so fall back to something, such as their initial, when one fails to load. In Tokio's previews, `GIFTERS` comes as a sample when you click **Test**.
+`GIFTERS` brings the top gifters. `live` is this LIVE's top 10 by `live.coins`, and `[]` while Tokio isn't connected. `allTime` is the top 10 by `allTime.coins` across every LIVE the streamer's profile kept, this one included. Ties go to whoever got there first. Tokio sends it as the overlay connects, after a profile loads, when a LIVE starts or ends, when a LIVE is deleted or the history cleared, and on gifts, at most once a second. Each `TopGifter` is `{ userId, username, handle, picture, live, allTime, giftedAt, platform }`, with `live` and `allTime` as `{ coins, gifts }`. `live` is 0 coins and 0 gifts for someone who hasn't sent gifts in this LIVE. Only gifts count as coins: treasure chests and Super Fan subscriptions don't. Only TikTok viewers show in `GIFTERS`: YouTube's Gifts have no price, and Bits, Kicks and Super Chats aren't coins. `giftedAt` is when their last gift came, in milliseconds since the epoch. `picture` is TikTok's link from the viewer's latest gift, or `""` when TikTok sent none. TikTok's links expire about 2 days after it sends them, so fall back to something, such as their initial, when one fails to load. In Tokio's previews, `GIFTERS` comes as a sample when you click **Test**.
+
+`LIVE` says which platforms the LIVE is on. `platforms` lists them in the order TikTok, Twitch, YouTube, Kick, each as `{ platform, channel }`, and is `[]` while Tokio isn't connected. A platform stays in it while Tokio reconnects to it. `channel` is the streamer's channel there, without "@": TikTok's username, Twitch's login, YouTube's handle and Kick's channel. When the streamer gave Tokio a YouTube link without the handle, like a LIVE's, it's the channel's name instead. Tokio sends it as the overlay connects, when a LIVE starts or ends, and when a platform joins or leaves it. An older Tokio doesn't send it. In Tokio's previews, `LIVE` comes as a sample when you click **Test**.
 
 `MUSIC_CHANGE` brings the whole song request queue, in order: the songs already played, the one playing (`playing: true`), then the ones waiting. Tokio sends it each time the queue changes, when its last song ends, and as the overlay connects while the queue has songs. When no song is playing, the queue is empty or its last song ended. `title` is the song and its artists, as `Song - Artist`. Tokio can't tell when a song is paused, so `playing` only marks where the queue is. In Tokio's previews, `MUSIC_CHANGE` comes as a sample when you click **Test**.
 
@@ -278,7 +284,7 @@ const onGift = (data: GiftData) => {
 tokio.on(TOKIO_EVENTS.GIFT, onGift);
 ```
 
-Besides the data types above, the package exports `UserData`, `Fan`, `TopGifter`, `Emotes`, `MusicInfo`, `CustomGift`, `EventMap` (each event's data) and `TokioPayload` (a message from Tokio).
+Besides the data types above, the package exports `UserData`, `Platform`, `PlatformRoom`, `LivePlatform`, `Fan`, `TopGifter`, `Emotes`, `MusicInfo`, `CustomGift`, `EventMap` (each event's data) and `TokioPayload` (a message from Tokio).
 
 To type the setup block's values:
 
@@ -303,6 +309,8 @@ Overlays you import into Tokio need the library, since Tokio's previews post the
   "data": { "user": {}, "likeCount": 5, "totalLikes": 1200 }
 }
 ```
+
+What the library fills in isn't there: TikTok viewers come without `platform`, and an older Tokio's `ROOM_USER` without `platforms`.
 
 ## Development
 

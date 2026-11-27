@@ -29,6 +29,43 @@ const isPayload = (payload: unknown): payload is TokioPayload =>
   typeof payload.type === "string" &&
   APP_EVENTS.has(payload.type);
 
+const isObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+// Tokio leaves TikTok's platform out, as its saved data has it
+const withPlatform = (value: unknown) => {
+  if (isObject(value) && !value.platform) value.platform = "tiktok";
+};
+
+/**
+ * Fills in what Tokio leaves out, so every viewer, top viewer and gifter
+ * says their platform, and ROOM_USER always has each platform's numbers.
+ */
+function fillPlatforms(payload: TokioPayload) {
+  const data: unknown = payload.data;
+  // A setting can be named "user"
+  if (!isObject(data) || payload.type === TOKIO_EVENTS.CONFIG) return;
+  if (payload.type === TOKIO_EVENTS.GIFTERS) {
+    for (const list of [data.live, data.allTime]) {
+      if (Array.isArray(list)) list.forEach(withPlatform);
+    }
+  } else if (payload.type === TOKIO_EVENTS.ROOM_USER) {
+    if (Array.isArray(data.ranks)) data.ranks.forEach(withPlatform);
+    // An older Tokio sends none, and connects only to TikTok
+    if (!Array.isArray(data.platforms)) {
+      data.platforms = [
+        {
+          platform: "tiktok",
+          viewers: typeof data.viewers === "number" ? data.viewers : 0,
+          views: typeof data.views === "number" ? data.views : 0,
+        },
+      ];
+    }
+  } else {
+    withPlatform(data.user);
+  }
+}
+
 export class EventLoader {
   private _ws: ReconnectingWebSocket | null = null;
   private _subscribers: Subscribers = {};
@@ -206,6 +243,7 @@ export class EventLoader {
 
   private _handleEvents(payload: unknown) {
     if (isPayload(payload)) {
+      fillPlatforms(payload);
       this._publish(payload.type, payload.data);
     } else {
       const type =

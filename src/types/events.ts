@@ -1,3 +1,6 @@
+// The platforms Tokio connects to
+export type Platform = "tiktok" | "twitch" | "youtube" | "kick";
+
 export interface UserData {
   username: string;
   handle: string;
@@ -18,8 +21,9 @@ export interface UserData {
   // "youtube:@handle". Kick's subscriptions and gifted subs get the id Tokio
   // finds for the username, and its hosts and rewards come without one.
   userId?: string;
-  // Where the viewer is. Missing means TikTok.
-  platform?: "tiktok" | "twitch" | "youtube" | "kick";
+  // Where the viewer is. Tokio leaves TikTok's out, and this library fills
+  // it in.
+  platform: Platform;
   // Months subscribed (Twitch, Kick) or a member (YouTube), when their badge
   // says so. YouTube's badge says only its milestone: 1 year is 12.
   subMonths?: number;
@@ -48,11 +52,40 @@ export interface ChatData {
   };
 }
 
+// One platform's own numbers in ROOM_USER
+export interface PlatformRoom {
+  platform: Platform;
+  viewers: number;
+  // 0 on Twitch, YouTube and Kick, which have no views
+  views: number;
+}
+
 export type RoomUserData = {
+  // TikTok's top viewers
   ranks: (UserData & { score: number; position: number })[];
+  // Added up over the connected platforms
   views: number;
   viewers: number;
+  // Each connected platform's, in the order TikTok, Twitch, YouTube, Kick.
+  // An older Tokio sends none and connects only to TikTok, so this library
+  // gives it TikTok's alone.
+  platforms: PlatformRoom[];
 };
+
+// A platform the LIVE is on, with the streamer's channel there
+export interface LivePlatform {
+  platform: Platform;
+  // Without "@": TikTok's username, Twitch's login, YouTube's handle (the
+  // channel's name when Tokio was given a link to a channel page or a LIVE)
+  // and Kick's channel
+  channel: string;
+}
+
+// The platforms the LIVE is on, reconnecting ones included, in the order
+// TikTok, Twitch, YouTube, Kick, and [] while Tokio isn't connected
+export interface LiveData {
+  platforms: LivePlatform[];
+}
 
 export interface Emotes {
   emoteID: string;
@@ -207,8 +240,8 @@ export interface TopGifter {
   allTime: { coins: number; gifts: number };
   // When their last gift came, in ms since the epoch.
   giftedAt: number;
-  // Missing means TikTok
-  platform?: "tiktok" | "twitch" | "youtube" | "kick";
+  // Filled in like UserData's: "tiktok", as only TikTok's gifters count
+  platform: Platform;
 }
 
 // The top 10 by coins: in this LIVE ([] while Tokio isn't connected), and
